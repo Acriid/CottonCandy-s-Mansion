@@ -15,5 +15,5 @@ MonoBehaviour:
   ItemName: 
   ItemDescription: 
   ItemSprite: {fileID: 0}
-  ItemCost: 0
+  ItemCost: 2
   ItemObject: {fileID: 1720793498268133755, guid: cdf67195a9a7d3142bbf139b9e385d64, type: 3}
