@@ -9,4 +9,13 @@ public class ItemSO : ScriptableObject
     public Sprite ItemSprite;
     public int ItemCost;
     public GameObject ItemObject;
+    public Vector3 ItemSize;
+    public Bounds GetItemBounds()
+    {
+        return ItemObject.GetComponent<MeshRenderer>().bounds;
+    }
+    public void InitializeSize()
+    {
+        ItemSize = ItemObject.GetComponent<MeshRenderer>().bounds.size;
+    }
 }
