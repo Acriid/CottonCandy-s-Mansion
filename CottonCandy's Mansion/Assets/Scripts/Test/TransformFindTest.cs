@@ -6,6 +6,6 @@ public class TransformFindTest : MonoBehaviour
     public Transform rootTransform;
     void Awake()
     {
-        rootTransform.Find(TransformToFind).gameObject.SetActive(false);
+        Debug.Log(rootTransform.Find(TransformToFind).forward * -1);
     }
 }
