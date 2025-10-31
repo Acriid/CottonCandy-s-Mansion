@@ -6,7 +6,6 @@ public class RoomSO : ScriptableObject
 {
     public string RoomName;
     public string RoomDescription;
-    public int RoomCost;
     public Vector3 RoomSize;
     public GameObject MainRoom;
 
@@ -17,4 +16,9 @@ public class RoomSO : ScriptableObject
 
     /*Adding on rooms equal to room sizes (y if adding forward/back and x if adding to the sides) 
       added together and divided by 2. This equals the room spawn spot.*/
+
+    public enum RoomType
+    {
+        
+    }
 }

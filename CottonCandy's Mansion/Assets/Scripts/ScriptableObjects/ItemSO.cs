@@ -7,7 +7,7 @@ public class ItemSO : ScriptableObject
     public string ItemName;
     public string ItemDescription;
     public Sprite ItemSprite;
-    public int ItemCost;
+    public ItemRarity rarity;
     public GameObject ItemObject;
     public Vector3 ItemSize;
     public Bounds GetItemBounds()
@@ -17,5 +17,13 @@ public class ItemSO : ScriptableObject
     public void InitializeSize()
     {
         ItemSize = ItemObject.GetComponent<MeshRenderer>().bounds.size;
+    }
+
+    public enum ItemRarity
+    {
+        Common,
+        Rare,
+        Legendary,
+        None
     }
 }

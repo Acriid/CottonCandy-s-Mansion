@@ -3,56 +3,54 @@ using UnityEngine;
 
 public class RandomItemSpawning : MonoBehaviour
 {
-    public List<ItemSO> playerItemSO;
-    public List<Bounds> itemBounds;
-    public Transform parentTransform;
-    public int Budget;
-    public int CheckTimes;
+    public List<GameObject> restrictedBoundsObjects;
+    public List<Bounds> restrictedBounds;
+    public Transform spawnTransform;
+    public int totalBudget;
+    public int TotalCheckTimes;
     public float SpawnRadius;
-    void Awake()
+    public GameObject SpawnBoundsObject;
+    private Bounds SpawnBounds;
+    void OnEnable()
     {
-        foreach(ItemSO itemSO in playerItemSO)
-        {
-            itemSO.InitializeSize();
-        }
-        SpawnItems();
-    }
-    private void SpawnItems()
-    {
-        while (Budget > 0 && playerItemSO.Count != 0)
-        {
-            int randomSpot = Random.Range(0, playerItemSO.Count);
-            if (CheckIfEnoughBudget(Budget, playerItemSO[randomSpot].ItemCost))
-            {
-                bool validPoint = false;
-                Vector3 randomPoint = Vector3.zero;
-                Bounds testBounds = new Bounds(Vector3.zero, Vector3.zero);
-                for (int i = 0; i < CheckTimes; i++)
-                {
-                    randomPoint = GetRandomPointinRange(SpawnRadius);
-                    testBounds = new Bounds(randomPoint, playerItemSO[randomSpot].ItemSize);
-                    if (CheckIfValidSpawn(testBounds)) { validPoint = true; break; }
-                }
+        SpawnBounds = SpawnBoundsObject.GetComponent<MeshRenderer>().bounds;
 
-                if (validPoint)
-                {
-                    SpawnObject(randomPoint, playerItemSO[randomSpot].ItemObject);
-                    Budget -= playerItemSO[randomSpot].ItemCost;
-                    itemBounds.Add(testBounds);
-                }
-                else
-                {
-                    playerItemSO.RemoveAt(randomSpot);
-                }
-            }
-            else
+        foreach (GameObject boundsObject in restrictedBoundsObjects)
+        {
+            restrictedBounds.Add(boundsObject.GetComponent<MeshRenderer>().bounds);
+        }
+
+        SpawnItems(totalBudget, TotalCheckTimes, spawnTransform, restrictedBounds);
+    }
+    private void SpawnItems(int Budget, int CheckTimes, Transform parentTransform, List<Bounds> bounds)
+    {
+        int RunTimes = 0;
+        while (Budget > 0 && RunTimes <= CheckTimes)
+        {
+            RunTimes++;
+            ItemSO itemToSpawn = ItemManager.instance.GetRandomItem();
+            int CheckRunTimes = 0;
+            Vector3 spawnPoint = Vector3.zero;
+            Bounds itemBounds;
+            do
             {
-                playerItemSO.RemoveAt(randomSpot);
+                CheckRunTimes++;
+                spawnPoint = GetRandomPointInBound(SpawnBounds);
+                itemBounds = new Bounds(spawnPoint, itemToSpawn.ItemSize);
+            } while (!CheckIfValidSpawn(itemBounds, bounds) && CheckRunTimes <= CheckTimes);
+
+            if(CheckIfValidSpawn(itemBounds, bounds))
+            {
+                SpawnObject(spawnPoint,itemToSpawn.ItemObject, parentTransform);
+                Budget -= ItemManager.instance.ItemCost;
+                bounds.Add(itemBounds);
+                RunTimes = 0;
             }
+            
 
         }
     }
-    private void SpawnObject(Vector3 point,GameObject spawnObject)
+    private void SpawnObject(Vector3 point, GameObject spawnObject, Transform parentTransform)
     {
         Instantiate(spawnObject, point, Quaternion.identity, parentTransform);
     }
@@ -61,19 +59,32 @@ public class RandomItemSpawning : MonoBehaviour
     {
         return currentBudget >= spawnCost;
     }
-    private Vector3 GetRandomPointinRange(float range)
+
+    private Vector3 GetRandomPointinRange(float range, Transform parentTransform)
     {
-        float randomX = Random.Range(-range, range);
-        float randomY = Random.Range(-range, range);
-        float randomZ = Random.Range(-range, range);
+        float randomX = parentTransform.localPosition.x + Random.Range(-range, range);
+        float randomY = parentTransform.localPosition.y + Random.Range(-range, range);
+        float randomZ = parentTransform.localPosition.z + Random.Range(-range, range);
         Vector3 randomSpot = new Vector3(randomX, randomY, randomZ);
 
         return randomSpot;
     }
-    private bool CheckIfValidSpawn(Bounds spawnBounds)
+
+    private Vector3 GetRandomPointInBound(Bounds bounds)
+    {
+
+        float randomX = Random.Range(bounds.min.x, bounds.max.x);
+        float randomY = Random.Range(bounds.min.y, bounds.max.y);
+        float randomZ = Random.Range(bounds.min.z, bounds.max.z);
+        Vector3 randomSpot = new Vector3(randomX, randomY, randomZ);
+
+        return randomSpot;
+    }
+
+    private bool CheckIfValidSpawn(Bounds spawnBounds, List<Bounds> staticBounds)
     {
         bool result = true;
-        foreach (Bounds bounds in itemBounds)
+        foreach (Bounds bounds in staticBounds)
         {
             if (CompareBounds(bounds, spawnBounds))
             {

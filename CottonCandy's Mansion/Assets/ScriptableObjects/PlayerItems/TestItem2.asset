@@ -16,4 +16,6 @@ MonoBehaviour:
   ItemDescription: 
   ItemSprite: {fileID: 0}
   ItemCost: 3
+  rarity: 1
   ItemObject: {fileID: 1454349761334375218, guid: a15417a93768baf48ad8e21065996fa9, type: 3}
+  ItemSize: {x: 1, y: 1, z: 1}
