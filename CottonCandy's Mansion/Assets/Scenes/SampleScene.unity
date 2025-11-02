@@ -7077,7 +7077,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1734091641
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8015,9 +8015,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b61377aa1e7498241860084b8aa87872, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ItemManager
-  items:
-  - {fileID: 11400000, guid: f5440031e0719db46b0f9a3953f549e7, type: 2}
-  - {fileID: 11400000, guid: 8d40945166f2cdb45b233b0b8aca5762, type: 2}
+  LoadLable: Items
   rarityDictionary:
     newDictionaryItems:
     - rarity: 0

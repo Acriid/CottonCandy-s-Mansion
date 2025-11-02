@@ -28,7 +28,6 @@ public class ItemManager : MonoBehaviour
 
         foreach (ItemSO item in items)
         {
-            Debug.Log(item.name);
             item.InitializeSize();
         }
         //Need to do the rarity different. Temp Hard coded for now
