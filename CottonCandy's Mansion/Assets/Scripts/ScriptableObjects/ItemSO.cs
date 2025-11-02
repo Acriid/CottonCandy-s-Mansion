@@ -26,4 +26,5 @@ public class ItemSO : ScriptableObject
         Legendary,
         None
     }
+
 }
