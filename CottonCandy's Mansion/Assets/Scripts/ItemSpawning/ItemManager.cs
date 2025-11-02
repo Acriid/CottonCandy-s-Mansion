@@ -1,51 +1,81 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
-using UnityEngine.Rendering;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using System.Threading.Tasks;
 
 public class ItemManager : MonoBehaviour
 {
     public static ItemManager instance;
     [Header("Lists")]
-    public List<ItemSO> items;
+    public string LoadLable = "Items";
+    private List<ItemSO> items = new List<ItemSO>();
     private Dictionary<ItemSO.ItemRarity, List<ItemSO>> itemDictionary = new Dictionary<ItemSO.ItemRarity, List<ItemSO>>();
     [Header("RarityAttributes")]
     [SerializeField] RarityDictionary rarityDictionary;
     private Dictionary<ItemSO.ItemRarity, float> RarityChances;
     [SerializeField] public int ItemCost;
-    void Awake()
+    async void Awake()
     {
-        foreach(ItemSO item in items)
+        //Singleton check
+        if (instance == null) { instance = this; }
+        else { return; }
+        
+
+        await LoadAllItems();
+
+
+        foreach (ItemSO item in items)
         {
+            Debug.Log(item.name);
             item.InitializeSize();
         }
-        if (instance == null) { instance = this; InitializeLists(); }
+        //Need to do the rarity different. Temp Hard coded for now
         RarityChances = rarityDictionary.toDictionary();
         UpdateRarityChances();
         Debug.Log(GetRandomItem().name);
-        
+
     }
 
+    private async Task LoadAllItems()
+    {
+        AsyncOperationHandle<IList<ItemSO>> handle = Addressables.LoadAssetsAsync<ItemSO>(LoadLable, null);
+
+        await handle.Task;
+
+        if (handle.Status == AsyncOperationStatus.Succeeded)
+        {
+            items.AddRange(handle.Result);
+        }
+        else
+        {
+            Debug.LogError("Failed to load Items.");
+        }
+
+        Addressables.Release(handle);
+
+        InitializeLists();
+    }
     private void InitializeLists()
     {
+        //Reset items
         itemDictionary = new Dictionary<ItemSO.ItemRarity, List<ItemSO>>();
-        InitializeRarity();
+        //Initialize list
+        foreach (ItemSO.ItemRarity rarity in Enum.GetValues(typeof(ItemSO.ItemRarity)))
+        {
+            itemDictionary.Add(rarity, new List<ItemSO>());
+        }
+        //Adds items to list
         foreach (ItemSO itemSO in items)
         {
             itemDictionary[itemSO.rarity].Add(itemSO);
         }
     }
-    private void InitializeRarity()
-    {
-        foreach(ItemSO.ItemRarity rarity in Enum.GetValues(typeof(ItemSO.ItemRarity)))
-        {
-            itemDictionary.Add(rarity, new List<ItemSO>());
-        }
-    }
+
     private void ShowDictionary()
     {
-        foreach(var item in itemDictionary)
+        foreach (var item in itemDictionary)
         {
             foreach (ItemSO listItem in item.Value)
             {
@@ -55,23 +85,24 @@ public class ItemManager : MonoBehaviour
     }
     private void UpdateRarityChances()
     {
-        
+
         float CurrentPercentage = 0f;
+        //Gets current chances total
         foreach (var item in RarityChances)
         {
             if (!(item.Value < 0))
             {
-               CurrentPercentage += item.Value;
-            }          
+                CurrentPercentage += item.Value;
+            }
         }
-
+        //Checks if equal to 100% changes chances if not
         if (!Mathf.Approximately(CurrentPercentage, 1f))
         {
             Dictionary<ItemSO.ItemRarity, float> newRarityChances = new Dictionary<ItemSO.ItemRarity, float>();
             foreach (var item in RarityChances)
             {
                 float percentage = item.Value / CurrentPercentage;
-                if(percentage < 0) { percentage = 0f; }
+                if (percentage < 0) { percentage = 0f; }
                 newRarityChances.Add(item.Key, percentage);
             }
             RarityChances = newRarityChances;
@@ -86,7 +117,7 @@ public class ItemManager : MonoBehaviour
             if (!Mathf.Approximately(item.Value, 0f))
             {
                 cumulativeThreshold += item.Value;
-                thresholds.Add(cumulativeThreshold,item.Key);
+                thresholds.Add(cumulativeThreshold, item.Key);
             }
         }
         float random = UnityEngine.Random.Range(0f, 1f);
