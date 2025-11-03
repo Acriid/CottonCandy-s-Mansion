@@ -25,15 +25,11 @@ public class ItemManager : MonoBehaviour
 
         await LoadAllItems();
 
-
-        foreach (ItemSO item in items)
-        {
-            item.InitializeSize();
-        }
         //Need to do the rarity different. Temp Hard coded for now
         RarityChances = rarityDictionary.toDictionary();
         UpdateRarityChances();
-        Debug.Log(GetRandomItem().name);
+
+
 
     }
 
@@ -54,6 +50,11 @@ public class ItemManager : MonoBehaviour
 
         Addressables.Release(handle);
 
+        foreach (ItemSO item in items)
+        {
+            item.InitializeSize();
+        }
+        
         InitializeLists();
     }
     private void InitializeLists()
@@ -70,18 +71,10 @@ public class ItemManager : MonoBehaviour
         {
             itemDictionary[itemSO.rarity].Add(itemSO);
         }
+
+        items.Clear();
     }
 
-    private void ShowDictionary()
-    {
-        foreach (var item in itemDictionary)
-        {
-            foreach (ItemSO listItem in item.Value)
-            {
-                Debug.Log(listItem);
-            }
-        }
-    }
     private void UpdateRarityChances()
     {
 

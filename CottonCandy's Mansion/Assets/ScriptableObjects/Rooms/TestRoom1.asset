@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RoomSO
   RoomName: 
   RoomDescription: 
-  MainRoom: {fileID: 0}
-  RoomSize: {x: 0, y: 0, z: 0}
+  MainRoom: {fileID: 3346343382402644647, guid: aea29b13c75e4774c8eedcbf760425ec, type: 3}
+  RoomSize: {x: 17, y: 10, z: 17}

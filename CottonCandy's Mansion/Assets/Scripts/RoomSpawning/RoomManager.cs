@@ -1,11 +1,42 @@
-using UnityEngine;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using System.Threading.Tasks;
 
 public class RoomManager : MonoBehaviour
 {
     public static RoomManager instance;
+    public string LoadLable = "Rooms";
     private Dictionary<RoomSO.RoomType, List<RoomSO>> itemDictionary = new Dictionary<RoomSO.RoomType, List<RoomSO>>();
+    private List<RoomSO> rooms = new List<RoomSO>();
+    async void Awake()
+    {
+        if (instance == null) { instance = this; }
+        else { return; }
+
+        await LoadAllRooms();
+    }
+
+    private async Task LoadAllRooms()
+    {
+        AsyncOperationHandle<IList<RoomSO>> handle = Addressables.LoadAssetsAsync<RoomSO>(LoadLable, null);
+
+        await handle.Task;
+
+        if (handle.Status == AsyncOperationStatus.Succeeded)
+        {
+            rooms.AddRange(handle.Result);
+        }
+        else
+        {
+            Debug.LogError("Failed to load rooms.");
+        }
+
+        Addressables.Release(handle);
+
+    }
 }
 
 
