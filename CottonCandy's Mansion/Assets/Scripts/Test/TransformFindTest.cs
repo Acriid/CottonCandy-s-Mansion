@@ -14,9 +14,11 @@ public class TransformFindTest : MonoBehaviour
         Vector3 newSpawn = Vector3.zero;
         foreach (Transform door in doors)
         {
-            newSpawn = new Vector3(0f, flooar.position.y, door.position.z) + -0.5f * door.forward + new Vector3(0f, 0f, roomSO.RoomSize.z / 2);
+            Vector3 newForward = door.forward * -1;
+            newSpawn = Vector3.Scale(door.position,newForward) + newForward/2 + Vector3.Scale(roomSO.RoomSize/2,newForward);
             Debug.Log(newSpawn);
         }
         Instantiate(roomSO.MainRoom, newSpawn, Quaternion.identity, rootTransform);
+        
     }
 }

@@ -8,6 +8,7 @@ public class RoomSO : ScriptableObject
     public string RoomDescription;
     public GameObject MainRoom;
     public Vector3 RoomSize;
+    public RoomType Type;
     public enum RoomType
     {
         Hallway,
