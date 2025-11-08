@@ -15,6 +15,12 @@ MonoBehaviour:
   m_GroupName: Default Local Group
   m_GUID: ae533d05ab7adb442a2391ac710d3099
   m_SerializeEntries:
+  - m_GUID: 2d1d2df11cf3c8749933c7fc4f40aae7
+    m_Address: Assets/ScriptableObjects/Rooms
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Room
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bc281b31c59b3464e85452f65cb42441
     m_Address: Assets/ScriptableObjects/PlayerItems
     m_ReadOnly: 0

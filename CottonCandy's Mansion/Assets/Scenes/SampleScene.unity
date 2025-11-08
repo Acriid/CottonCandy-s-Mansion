@@ -1498,7 +1498,7 @@ MeshCollider:
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: 684217906}
+  m_Mesh: {fileID: 1338276035}
 --- !u!33 &132076655
 MeshFilter:
   m_ObjectHideFlags: 10
@@ -2429,7 +2429,7 @@ MeshCollider:
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: 908458079}
+  m_Mesh: {fileID: 684217906}
 --- !u!33 &164855088
 MeshFilter:
   m_ObjectHideFlags: 10
@@ -6047,7 +6047,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &342984280
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6660,8 +6660,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 641707285}
   - {fileID: 164855086}
+  - {fileID: 641707285}
   m_Father: {fileID: 2100928836}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &436822143
@@ -7141,7 +7141,7 @@ MeshCollider:
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: 1787481954}
+  m_Mesh: {fileID: 900785612}
 --- !u!33 &511099679
 MeshFilter:
   m_ObjectHideFlags: 10
@@ -7617,6 +7617,37 @@ Mesh:
       - serializedVersion: 1
         m_IndexStart: 0
         m_IndexCount: 0
+--- !u!1 &518790661
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 518790662}
+  m_Layer: 0
+  m_Name: Level
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &518790662
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 518790661}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!43 &519428127
 Mesh:
   m_ObjectHideFlags: 0
@@ -8213,6 +8244,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2047121060}
+  - {fileID: 751076207}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &641707284
@@ -8272,7 +8304,7 @@ MeshCollider:
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: 340665410}
+  m_Mesh: {fileID: 908458079}
 --- !u!33 &641707287
 MeshFilter:
   m_ObjectHideFlags: 10
@@ -9756,6 +9788,52 @@ Transform:
   - {fileID: 1549369272}
   m_Father: {fileID: 2100928836}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &751076206
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 751076207}
+  - component: {fileID: 751076208}
+  m_Layer: 0
+  m_Name: RoomManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &751076207
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 751076206}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 635960234}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &751076208
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 751076206}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0e18f1995455b644b07775df91c11a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoomManager
+  LoadLable: Room
+  roomParent: {fileID: 518790662}
 --- !u!1 &756362272
 GameObject:
   m_ObjectHideFlags: 0
@@ -10553,8 +10631,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1377684523}
   - {fileID: 132076653}
+  - {fileID: 1377684523}
   m_Father: {fileID: 1010836211}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!43 &900785612
@@ -10928,7 +11006,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &948087260
 Transform:
   m_ObjectHideFlags: 0
@@ -11002,7 +11080,7 @@ MeshCollider:
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: 1639809410}
+  m_Mesh: {fileID: 326307134}
 --- !u!33 &955492245
 MeshFilter:
   m_ObjectHideFlags: 10
@@ -12443,12 +12521,12 @@ GameObject:
   m_Component:
   - component: {fileID: 1104836353}
   m_Layer: 0
-  m_Name: Hallway1
+  m_Name: HallwayStraight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1104836353
 Transform:
   m_ObjectHideFlags: 0
@@ -15764,7 +15842,7 @@ MeshCollider:
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: 123024708}
+  m_Mesh: {fileID: 1908739787}
 --- !u!33 &1328214546
 MeshFilter:
   m_ObjectHideFlags: 10
@@ -16830,7 +16908,7 @@ MeshCollider:
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: 908458079}
+  m_Mesh: {fileID: 1234450310}
 --- !u!33 &1377684525
 MeshFilter:
   m_ObjectHideFlags: 10
@@ -21816,7 +21894,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1863226269
 Transform:
   m_ObjectHideFlags: 0
@@ -22417,7 +22495,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2008530660
 Transform:
   m_ObjectHideFlags: 0
@@ -24142,3 +24220,4 @@ SceneRoots:
   - {fileID: 342984281}
   - {fileID: 1399539495}
   - {fileID: 1633520509}
+  - {fileID: 518790662}
