@@ -9,13 +9,20 @@ using NUnit.Framework.Interfaces;
 public class RoomManager : MonoBehaviour
 {
     public static RoomManager instance;
-    public string LoadLable = "Room";
+    public Transform roomParent;
     private Dictionary<RoomSO.RoomType, List<RoomSO>> RoomDictionary = new Dictionary<RoomSO.RoomType, List<RoomSO>>();
     private List<RoomSO> SpecificRoomsList = new List<RoomSO>();
     private List<RoomSO> rooms = new List<RoomSO>();
     private List<GameObject> CurrentLevel = new List<GameObject>();
     private List<Bounds> CurrentBounds = new List<Bounds>();
-    public Transform roomParent;
+    #region String Constants
+    //Doors
+    const string DoorString = "Structure/Doors/Door_Next";
+    //HeightOffsets
+    const string HeightString = "Structure/HeightOffset/Upper";
+    //Room Loading
+    const string LoadLable = "Room";
+    #endregion
     async void Awake()
     {
         if (instance == null) { instance = this; }
@@ -23,7 +30,7 @@ public class RoomManager : MonoBehaviour
 
         await LoadAllRooms();
 
-        for(int i = 0; i < 10; i ++)
+        for (int i = 0; i < 10; i++)
         {
             SpawnLevel();
         }
@@ -31,7 +38,6 @@ public class RoomManager : MonoBehaviour
 
     private async Task LoadAllRooms()
     {
-        //
         AsyncOperationHandle<IList<RoomSO>> handle = Addressables.LoadAssetsAsync<RoomSO>(LoadLable, null);
 
         await handle.Task;
@@ -67,7 +73,7 @@ public class RoomManager : MonoBehaviour
         RoomSO roomToSpawn = GetRandomRoom();
         GameObject LevelObject;
 
-
+        //First Levels
         if (CurrentLevel.Count == 0)
         {
             LevelObject = Instantiate(roomToSpawn.MainRoom, Vector3.zero, Quaternion.identity, roomParent);
@@ -75,12 +81,13 @@ public class RoomManager : MonoBehaviour
             CurrentBounds.Add(new Bounds(roomToSpawn.MainRoom.transform.position, roomToSpawn.RoomSize));
             return;
         }
-
+        //Sequencial levels
         GameObject CurrentRoom = CurrentLevel[CurrentLevel.Count - 1];
         Vector3 RoomPosition;
         Bounds spawnBounds;
         Quaternion RoomRotation;
 
+        //Test if room does not spawn in another room if no room can spawn just spawn a room
         do
         {
             runs++;
@@ -88,10 +95,11 @@ public class RoomManager : MonoBehaviour
             RoomPosition = GetNewRoomPosition(roomToSpawn, CurrentRoom);
             spawnBounds = new Bounds(RoomPosition, roomToSpawn.RoomSize - Vector3.one);
             RoomRotation = GetRoomRotation(CurrentRoom);
-            if(!TestIfCanSpawn(spawnBounds, CurrentBounds))
+            if (!TestIfCanSpawn(spawnBounds, CurrentBounds))
             {
                 RemoveFromList(roomToSpawn);
             }
+
         } while (!TestIfCanSpawn(spawnBounds, CurrentBounds) && runs < 99);
 
 
@@ -106,21 +114,29 @@ public class RoomManager : MonoBehaviour
     {
         //Gets room and door
         Vector3 CurrentRoomDimensions = CurrentRoom.transform.position;
-        Transform spawnDoor = CurrentRoom.transform.Find("Structure/Doors/Door_Next");
+        Transform UpperOffset = CurrentRoom.transform.Find(HeightString);
+
+        if (UpperOffset != null)
+            CurrentRoomDimensions.y += UpperOffset.position.y;
+
+        Transform spawnDoor = CurrentRoom.transform.Find(DoorString);
+
         //Mirrors forward
         Vector3 newForward = spawnDoor.forward * -1;
+
         //Gets new spawn
         Vector3 ResultVector = CompareVectors(CurrentRoomDimensions, newForward,0.0001f);
         Vector3 newDoorPosition = Vector3.Scale(Vector3.Scale(spawnDoor.position, newForward), newForward);
         Vector3 newSpawn = newDoorPosition + newForward / 2f + Vector3.Scale(roomToSpawn.RoomSize / 2f, newForward) +
-        Vector3.Scale(CurrentRoomDimensions,ResultVector);
+        Vector3.Scale(CurrentRoomDimensions, ResultVector);
+        
         return newSpawn;
         
     }
     private Quaternion GetRoomRotation(GameObject CurrentRoom)
     {
         //Gets room and door
-        Transform spawnDoor = CurrentRoom.transform.Find("Structure/Doors/Door_Next");
+        Transform spawnDoor = CurrentRoom.transform.Find(DoorString);
         //Mirrors forward
         Vector3 newForward = spawnDoor.forward * -1;
         //Gets new Rotation
@@ -128,31 +144,44 @@ public class RoomManager : MonoBehaviour
         return result;
     }
     #endregion
+
     private RoomSO GetRandomRoom()
     {
-        if(SpecificRoomsList.Count == 0)
+        if (SpecificRoomsList.Count == 0)
         {
-            SpecificRoomsList = new List<RoomSO>(GetRandomRoomList());
+            SpecificRoomsList = new List<RoomSO>(GetHallwayRoomList());
         }
         int UpperBoundry = SpecificRoomsList.Count - 1;
         if (UpperBoundry == -1)
         {
-            SpecificRoomsList = new List<RoomSO>(GetRandomRoomList());
+            SpecificRoomsList = new List<RoomSO>(GetHallwayRoomList());
         }
         UpperBoundry = SpecificRoomsList.Count - 1;
         int RandomRoom = UnityEngine.Random.Range(0, UpperBoundry);
         RoomSO result = SpecificRoomsList[RandomRoom];
         return result;
     }
-    private List<RoomSO> GetRandomRoomList()
+
+    private List<RoomSO> GetHallwayRoomList()
     {
         return RoomDictionary[RoomSO.RoomType.Hallway];
     }
+    private List<RoomSO> GetTreasureRoomList()
+    {
+        return RoomDictionary[RoomSO.RoomType.Treasure];
+    }
+    private List<RoomSO> GetBossRoomList()
+    {
+        return RoomDictionary[RoomSO.RoomType.Boss];
+    }
+    
     private void RemoveFromList(RoomSO roomToRemove)
     {
         if (SpecificRoomsList.Count == 0) { return; }
         SpecificRoomsList.Remove(roomToRemove);
     }
+
+
     private Vector3 CompareVectors(Vector3 a, Vector3 b, float tolerance = 0.0001f)
     {
         return new Vector3(
@@ -161,6 +190,8 @@ public class RoomManager : MonoBehaviour
             (Mathf.Abs(a.z) > tolerance && Mathf.Abs(b.z) <= tolerance) ? 1 : 0
         );
     }
+
+    
     private bool TestIfCanSpawn(Bounds SpawnBounds, List<Bounds> CompareBounds)
     {
         foreach(Bounds bounds in CompareBounds)

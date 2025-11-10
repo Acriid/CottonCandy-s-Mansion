@@ -7,13 +7,15 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f9ef75a998e86374a949443613963a6d, type: 3}
-  m_Name: StraightHallway
+  m_Name: StairsTest
   m_EditorClassIdentifier: Assembly-CSharp::RoomSO
   RoomName: 
   RoomDescription: 
-  MainRoom: {fileID: 4008964361547406029, guid: d24d8b011237d0942aab838936f20612, type: 3}
-  RoomSize: {x: 17, y: 13, z: 17}
+  MainRoom: {fileID: 8252184308760607787, guid: 8fc9f417bf7ff974a95460f7fe204398, type: 3}
+  RoomSize: {x: 7, y: 14, z: 18}
   Type: 0
+  UpperOffset: {fileID: 0}
+  LowerOffset: {fileID: 0}

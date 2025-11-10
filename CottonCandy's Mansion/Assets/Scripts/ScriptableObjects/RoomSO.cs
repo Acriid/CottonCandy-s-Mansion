@@ -16,6 +16,7 @@ public class RoomSO : ScriptableObject
         Special,
         Encounter,
         Treasure,
+        End,
         None
     }
 }

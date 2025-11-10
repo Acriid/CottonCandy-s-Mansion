@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f9ef75a998e86374a949443613963a6d, type: 3}
-  m_Name: StraightHallway
+  m_Name: EndRoom
   m_EditorClassIdentifier: Assembly-CSharp::RoomSO
   RoomName: 
   RoomDescription: 
-  MainRoom: {fileID: 4008964361547406029, guid: d24d8b011237d0942aab838936f20612, type: 3}
-  RoomSize: {x: 17, y: 13, z: 17}
-  Type: 0
+  MainRoom: {fileID: 8151109496388457899, guid: 60f904af0111bdb4e974e29bf6ce1c6d, type: 3}
+  RoomSize: {x: 7, y: 7, z: 5}
+  Type: 5
