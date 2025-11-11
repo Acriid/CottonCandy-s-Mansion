@@ -70,7 +70,7 @@ public class RoomManager : MonoBehaviour
     {
         int runs = 0;
 
-        RoomSO roomToSpawn = GetRandomRoom();
+        RoomSO roomToSpawn = GetRandomRoom(SpecificRoomsList);
         GameObject LevelObject;
 
         //First Levels
@@ -91,13 +91,13 @@ public class RoomManager : MonoBehaviour
         do
         {
             runs++;
-            roomToSpawn = GetRandomRoom();
+            roomToSpawn = GetRandomRoom(SpecificRoomsList);
             RoomPosition = GetNewRoomPosition(roomToSpawn, CurrentRoom);
             spawnBounds = new Bounds(RoomPosition, roomToSpawn.RoomSize - Vector3.one);
             RoomRotation = GetRoomRotation(CurrentRoom);
             if (!TestIfCanSpawn(spawnBounds, CurrentBounds))
             {
-                RemoveFromList(roomToSpawn);
+                RemoveFromList(roomToSpawn,SpecificRoomsList);
             }
 
         } while (!TestIfCanSpawn(spawnBounds, CurrentBounds) && runs < 99);
@@ -110,7 +110,7 @@ public class RoomManager : MonoBehaviour
 
     }
 
-    private Vector3 GetNewRoomPosition(RoomSO roomToSpawn,GameObject CurrentRoom)
+    private Vector3 GetNewRoomPosition(RoomSO roomToSpawn, GameObject CurrentRoom)
     {
         //Gets room and door
         Vector3 CurrentRoomDimensions = CurrentRoom.transform.position;
@@ -125,13 +125,33 @@ public class RoomManager : MonoBehaviour
         Vector3 newForward = spawnDoor.forward * -1;
 
         //Gets new spawn
-        Vector3 ResultVector = CompareVectors(CurrentRoomDimensions, newForward,0.0001f);
+        Vector3 ResultVector = CompareVectors(CurrentRoomDimensions, newForward, 0.0001f);
         Vector3 newDoorPosition = Vector3.Scale(Vector3.Scale(spawnDoor.position, newForward), newForward);
         Vector3 newSpawn = newDoorPosition + newForward / 2f + Vector3.Scale(roomToSpawn.RoomSize / 2f, newForward) +
         Vector3.Scale(CurrentRoomDimensions, ResultVector);
-        
+
         return newSpawn;
+
+    }
+    private Vector3 GetNewRoomPosition(RoomSO roomToSpawn, RoomSO CurrentRoom,Vector3 RoomPosition,Quaternion RoomRotation)
+    {
+        Transform spawnDoor = CurrentRoom.MainRoom.transform.Find(DoorString);
+        spawnDoor.position += RoomPosition;
+        Vector3 doorForward = spawnDoor.forward * -1;
+        doorForward = RoomRotation * doorForward;
+
+        Vector3 CurrentRoomDimensions = RoomPosition;
+        Transform UpperOffset = CurrentRoom.MainRoom.transform.Find(HeightString);
         
+        if (UpperOffset != null)
+            CurrentRoomDimensions.y += UpperOffset.position.y;
+
+        Vector3 ResultVector = CompareVectors(CurrentRoomDimensions, doorForward, 0.001f);
+        Vector3 newDoorPosition = Vector3.Scale(Vector3.Scale(spawnDoor.position, doorForward), doorForward);
+        Vector3 newSpawn = newDoorPosition + doorForward / 2f + Vector3.Scale(roomToSpawn.RoomSize / 2f, doorForward) +
+        Vector3.Scale(CurrentRoomDimensions, ResultVector);
+
+        return Vector3.zero;
     }
     private Quaternion GetRoomRotation(GameObject CurrentRoom)
     {
@@ -143,42 +163,66 @@ public class RoomManager : MonoBehaviour
         Quaternion result = Quaternion.LookRotation(newForward);
         return result;
     }
+    private bool CheckIfCanContinue(RoomSO roomToCheck, GameObject CurrentRoom, List<RoomSO> RoomList, List<Bounds> BoundsList)
+    {
+        //Checks if the dungeon can continue if this room spawns.
+        //If not do not spawn this room.
+        //If can spawn this room
+        //Checks by getting the current room spawn for this room (GetNewRoomPosition) 
+        //Then gets a calculated room spawn for where the next room will spawn
+        //If no next room can spawn then return false.
+        //If a next room can spawn return true/
+        Vector3 RoomPosition = GetNewRoomPosition(roomToCheck, CurrentRoom);
+        Quaternion RoomRotation = GetRoomRotation(CurrentRoom);
+        Bounds spawnBounds = new Bounds(RoomPosition, roomToCheck.RoomSize - Vector3.one);
+
+
+        return true;
+    }
+    
+    private Vector3 CalculatedRoomSpawn(RoomSO CurrentRoom , Vector3 RoomPosition , Quaternion RoomRotation , List<RoomSO> RoomList)
+    {
+        //Simulate a what if the currentRoom is here
+        RoomSO randomRoom = GetRandomRoom(RoomList);
+        if (randomRoom == null)
+        {
+            return Vector3.zero;
+        }
+
+
+        return Vector3.one;
+    }
     #endregion
 
-    private RoomSO GetRandomRoom()
+    private RoomSO GetRandomRoom(List<RoomSO> RoomList)
     {
-        if (SpecificRoomsList.Count == 0)
+        //ListCheck
+        if (RoomList.Count == 0)
         {
-            SpecificRoomsList = new List<RoomSO>(GetHallwayRoomList());
+            return null;
         }
-        int UpperBoundry = SpecificRoomsList.Count - 1;
-        if (UpperBoundry == -1)
-        {
-            SpecificRoomsList = new List<RoomSO>(GetHallwayRoomList());
-        }
-        UpperBoundry = SpecificRoomsList.Count - 1;
+        //Gets Random Room From list
+        int UpperBoundry = RoomList.Count - 1;
         int RandomRoom = UnityEngine.Random.Range(0, UpperBoundry);
-        RoomSO result = SpecificRoomsList[RandomRoom];
+        RoomSO result = RoomList[RandomRoom];
+
         return result;
     }
 
-    private List<RoomSO> GetHallwayRoomList()
+    private List<RoomSO> GetRoomList(RoomSO.RoomType roomType)
     {
-        return RoomDictionary[RoomSO.RoomType.Hallway];
+        List<RoomSO> RoomList;
+        if (RoomDictionary.TryGetValue(roomType, out RoomList))
+            return RoomList;
+        else
+            return null;
     }
-    private List<RoomSO> GetTreasureRoomList()
+
+
+    private void RemoveFromList<T>(T removeValue, List<T> RemoveList)
     {
-        return RoomDictionary[RoomSO.RoomType.Treasure];
-    }
-    private List<RoomSO> GetBossRoomList()
-    {
-        return RoomDictionary[RoomSO.RoomType.Boss];
-    }
-    
-    private void RemoveFromList(RoomSO roomToRemove)
-    {
-        if (SpecificRoomsList.Count == 0) { return; }
-        SpecificRoomsList.Remove(roomToRemove);
+        if (RemoveList.Count == 0) { return; }
+        RemoveList.Remove(removeValue);
     }
 
 
