@@ -64,70 +64,21 @@ public class RoomManager : MonoBehaviour
     #region SpawnRoom
     private void TestSpawn()
     {
-        List<RoomSO> RoomList = GetRoomList(RoomSO.RoomType.Hallway);
-        List<GameObject> CurrentLevel = new();
-        //new Quaternion(1f,0.5f,0f,0f)
-        RoomSO randomRoom = GetRandomRoom(RoomList);
-        GameObject CurrentRoom = Instantiate(RoomtoSpawn.MainRoom, Vector3.zero,new Quaternion(1f,0.5f,0f,0f) , roomParent);
-        Vector3 RoomPosition = GetNewRoomPosition(RoomtoSpawn2, CurrentRoom);
-        Quaternion RoomRotation = GetRoomRotation(CurrentRoom);
-        Debug.Log(CurrentRoom.transform.position);
-        Instantiate(RoomtoSpawn2.MainRoom, RoomPosition, RoomRotation, roomParent);
+        Quaternion testRotation = Quaternion.Normalize(new Quaternion(1f, 0.5f, 0f, 0f));
+        GameObject CurrentRoom = Instantiate(RoomtoSpawn.MainRoom, Vector3.zero, testRotation, roomParent);
 
-    }
-    private void SpawnLevel(int levelSize)
-    {
-        List<RoomSO> RoomList = GetRoomList(RoomSO.RoomType.Hallway);
-        List<Bounds> BoundsList = new();
-        List<GameObject> CurrentLevel = new();
-        for(int i = 0; i < levelSize; i++)
-        {
-            CurrentLevel.Add(SpawnRoom(RoomList, BoundsList, CurrentLevel));
-        }
-    }
-    private GameObject SpawnRoom(List<RoomSO> RoomList, List<Bounds> BoundsList, List<GameObject> CurrentLevel)
-    {
-        List<RoomSO> roomList = new(RoomList);
-        RoomSO randomRoom = GetRandomRoom(roomList);
-        GameObject SpawnedRoom = null;
-        GameObject CurrentRoom = null;
-        Bounds RoomBounds;
-        if (CurrentLevel.Count == 0)
-        {
-            SpawnedRoom = Instantiate(randomRoom.MainRoom, Vector3.zero, Quaternion.identity, roomParent);
-            RoomBounds = new(SpawnedRoom.transform.position, randomRoom.RoomSize);
-            BoundsList.Add(RoomBounds);
-            return SpawnedRoom;
-        }
-        else
-        {
-            CurrentRoom = CurrentLevel[^1];
-        }
-        bool CanContinue = CheckIfCanContinue(randomRoom, CurrentRoom, roomList, BoundsList);
+        // ✅ Use the actual rotation, not the computed one
+        Quaternion RoomRotation = CurrentRoom.transform.rotation;
 
-        while (!CanContinue && roomList.Count > 0)
-        {
-            RemoveFromList(randomRoom, roomList);
-            if(roomList.Count > 0)
-            {
-                randomRoom = GetRandomRoom(roomList);
-            }
-            CanContinue = CheckIfCanContinue(randomRoom, CurrentRoom, roomList, BoundsList);
-        }
-        
-        if (roomList.Count <= 0)
-        {
-            return null;
-        }
-        
-        Vector3 RoomPosition = GetNewRoomPosition(randomRoom, CurrentRoom);
-        Quaternion RoomRotation = GetRoomRotation(CurrentRoom);
-        Bounds spawnBounds = new(RoomPosition, randomRoom.RoomSize - Vector3.one);
-        SpawnedRoom = Instantiate(randomRoom.MainRoom, RoomPosition, RoomRotation, roomParent);
-        BoundsList.Add(spawnBounds);
+        // Simulate next room
+        Vector3 RoomPosition2 = GetNewRoomPosition(RoomtoSpawn2, RoomtoSpawn, Vector3.zero, RoomRotation);
 
-        return SpawnedRoom;
+        Debug.Log("Actual Door World Pos: " + CurrentRoom.transform.Find(DoorString).position);
+        Debug.Log("Simulated Door World Pos: " + RoomPosition2);
+
+        Instantiate(RoomtoSpawn2.MainRoom, RoomPosition2, RoomRotation, roomParent);
     }
+    
     #region RoomPositions
 
     private Vector3 GetNewRoomPosition(RoomSO roomToSpawn, GameObject currentRoom)
@@ -164,37 +115,6 @@ public class RoomManager : MonoBehaviour
 
         return newRoomPosition;
     }
-
-    private Vector3 GetNewRoomPosition(RoomSO roomToSpawn, RoomSO CurrentRoom, Vector3 RoomPosition, Quaternion RoomRotation)
-    {
-        Vector3 CurrentRoomDimensions = RoomPosition;
-        Transform UpperOffset = CurrentRoom.MainRoom.transform.Find(UpperOffsetString);
-        Transform LowerOffset = roomToSpawn.MainRoom.transform.Find(LowerOffsetString);
-        Vector3 HeightOffset = Vector3.zero;
-
-        if (UpperOffset != null)
-        {
-            HeightOffset.y += UpperOffset.localPosition.y;
-
-        }
-        if (LowerOffset != null)
-        {
-            HeightOffset.y += Mathf.Abs(LowerOffset.localPosition.y);
-        }
-
-        Transform spawnDoor = CurrentRoom.MainRoom.transform.Find(DoorString);
-        Vector3 doorForward = spawnDoor.forward * -1;
-        doorForward = RoomRotation * doorForward;
-
-
-        Vector3 ResultVector = CompareVectors(CurrentRoomDimensions, doorForward, 0.001f);
-        Vector3 newDoorPosition = Vector3.Scale(Vector3.Scale(spawnDoor.position + CurrentRoomDimensions, doorForward), doorForward);
-        Vector3 newSpawn = newDoorPosition + doorForward / 2f + Vector3.Scale(RoomRotation * roomToSpawn.RoomSize / 2f, doorForward) +
-        Vector3.Scale(CurrentRoomDimensions, ResultVector);
-
-
-        return newSpawn;
-    }
     private Quaternion GetRoomRotation(GameObject CurrentRoom)
     {
         //Gets room and door
@@ -207,95 +127,79 @@ public class RoomManager : MonoBehaviour
 
         return result;
     }
-private Vector3 GPTGetNewRoomPosition(RoomSO roomToSpawn, RoomSO currentRoom, Vector3 roomPosition, Quaternion roomRotation)
-{
-    // --- Step 1: Get reference points from ScriptableObjects ---
-    Transform spawnDoor = currentRoom.MainRoom.transform.Find(DoorString);
-    Transform upperOffset = currentRoom.MainRoom.transform.Find(UpperOffsetString);
-    Transform lowerOffset = roomToSpawn.MainRoom.transform.Find(LowerOffsetString);
-
-    if (spawnDoor == null)
+    private Quaternion GetRoomRotation(RoomSO currentRoom, Quaternion roomRotation)
     {
-        Debug.LogError($"Door '{DoorString}' not found in {currentRoom.MainRoom.name}");
-        return roomPosition;
+        // --- Step 1: Find the door in the prefab ---
+        Transform spawnDoor = currentRoom.MainRoom.transform.Find(DoorString);
+
+        if (spawnDoor == null)
+        {
+            Debug.LogError($"Door '{DoorString}' not found in {currentRoom.MainRoom.name}");
+            return roomRotation; // Fallback to current rotation
+        }
+
+        // --- Step 2: Convert door orientation from local to world space ---
+        Vector3 worldForward = roomRotation * spawnDoor.forward;
+        Vector3 worldUp = roomRotation * spawnDoor.up;
+
+        // --- Step 3: Mirror the forward direction (so next room faces opposite) ---
+        Vector3 newForward = -worldForward.normalized;
+
+        // --- Step 4: Create new rotation using both forward and up directions ---
+        Quaternion result = Quaternion.LookRotation(newForward, worldUp);
+
+        return result;
     }
+    private Vector3 GetNewRoomPosition(RoomSO roomToSpawn, RoomSO currentRoom, Vector3 roomPosition, Quaternion roomRotation)
+    {
+        // --- Step 1: Find key transforms in the prefab ---
+        Transform spawnDoor = currentRoom.MainRoom.transform.Find(DoorString);
+        Transform upperOffset = currentRoom.MainRoom.transform.Find(UpperOffsetString);
+        Transform lowerOffset = roomToSpawn.MainRoom.transform.Find(LowerOffsetString);
 
-    // --- Step 2: Get direction and rotation ---
-    // Door forward in world space (rotated by current room's rotation)
-    Vector3 doorForward = roomRotation * spawnDoor.forward;
-    Vector3 newForward = -doorForward.normalized; // opposite of door direction
+        if (spawnDoor == null)
+        {
+            Debug.LogError($"Door '{DoorString}' not found in {currentRoom.MainRoom.name}");
+            return roomPosition;
+        }
 
-    // --- Step 3: Height offset (in world space) ---
-    Vector3 heightOffset = Vector3.zero;
-    if (upperOffset != null)
-        heightOffset.y += upperOffset.localPosition.y;
-    if (lowerOffset != null)
-        heightOffset.y += Mathf.Abs(lowerOffset.localPosition.y);
+        // --- Step 2: Normalize and apply rotation ---
+        Quaternion normalizedRot = Quaternion.Normalize(roomRotation);
 
-    // Rotate height offset into world orientation
-    heightOffset = roomRotation * heightOffset;
+        // Door’s forward and up in world space
+        Vector3 doorForward = normalizedRot * spawnDoor.forward;
+        Vector3 doorUp = normalizedRot * spawnDoor.up;
 
-    // --- Step 4: Room offset along spawn direction ---
-    Vector3 halfRoomSize = roomToSpawn.RoomSize / 2f;
-    Vector3 roomOffset = roomRotation * halfRoomSize;
-    float forwardDot = Vector3.Dot(roomOffset, newForward);
-    Vector3 roomScaleOffset = forwardDot * newForward;
+        // --- Step 3: Mirror door direction (new room faces opposite) ---
+        Vector3 newForward = -doorForward.normalized;
 
-    // --- Step 5: Compute world position of the door (in current room space) ---
-    Vector3 worldSpawnDoorPos = roomPosition + (roomRotation * (spawnDoor.localPosition));
+        // --- Step 4: Compute the door’s world-space position ---
+        Vector3 worldSpawnDoorPos = roomPosition + (normalizedRot * spawnDoor.localPosition);
+        Debug.Log("World door position (simulated): " + worldSpawnDoorPos);
 
-    // --- Step 6: Compute final new room position ---
-    Vector3 newRoomPosition = worldSpawnDoorPos + roomScaleOffset + heightOffset + newForward / 2f;
+        // --- Step 5: Handle height offset ---
+        Vector3 heightOffset = Vector3.zero;
+        if (upperOffset != null)
+            heightOffset.y += upperOffset.localPosition.y;
+        if (lowerOffset != null)
+            heightOffset.y += Mathf.Abs(lowerOffset.localPosition.y);
 
-    return newRoomPosition;
-}
+        // Rotate into world orientation
+        heightOffset = normalizedRot * heightOffset;
+
+        // --- Step 6: Offset by half the next room size along the new direction ---
+        Vector3 halfRoomSize = roomToSpawn.RoomSize / 2f;
+        Vector3 roomOffset = normalizedRot * halfRoomSize;
+        float forwardDot = Vector3.Dot(roomOffset, newForward);
+        Vector3 roomScaleOffset = forwardDot * newForward;
+
+        // --- Step 7: Combine everything ---
+        Vector3 newRoomPosition = worldSpawnDoorPos + roomScaleOffset + heightOffset + newForward * 0.5f;
+
+        return newRoomPosition;
+    }
 
     #endregion
-    private bool CheckIfCanContinue(RoomSO roomToCheck, GameObject CurrentRoom, List<RoomSO> RoomList, List<Bounds> BoundsList)
-    {
-        //Checks if the dungeon can continue if this room spawns.
-        //If not do not spawn this room.
-        //If can spawn this room
-        //Checks by getting the current room spawn for this room (GetNewRoomPosition) 
-        //Then gets a calculated room spawn for where the next room will spawn
-        //If no next room can spawn then return false.
-        //If a next room can spawn return true/
-
-
-        List<RoomSO> rooms = new(RoomList);
-        List<Bounds> bounds = new(BoundsList);
-        
-        Vector3 RoomPosition = GetNewRoomPosition(roomToCheck, CurrentRoom);
-        Quaternion RoomRotation = GetRoomRotation(CurrentRoom);
-        Bounds spawnBounds = new(RoomPosition, roomToCheck.RoomSize - Vector3.one);
-        Instantiate(roomToCheck.MainRoom, RoomPosition, RoomRotation, roomParent);
-        
-        if(!TestIfCanSpawn(spawnBounds,bounds))
-        {
-            return false;
-        }
-        bounds.Add(spawnBounds);
-
-        int Failsafe = 0;
-        bool CanSpawn;
-        do
-        {
-            Failsafe++;
-            RoomSO roomAfterThis = GetRandomRoom(rooms);
-            Debug.Log(roomAfterThis);
-            Vector3 RoomPosition2 = GetNewRoomPosition(roomAfterThis, roomToCheck, RoomPosition, RoomRotation);
-            Quaternion RoomRotation2 = GetRoomRotation(roomToCheck.MainRoom);
-            Bounds spawnBounds2 = new(RoomPosition2, roomAfterThis.RoomSize - Vector3.one);
-            CanSpawn = TestIfCanSpawn(spawnBounds2, bounds);
-            if (!CanSpawn)
-            {
-                RemoveFromList(roomAfterThis, rooms);
-            }
-            Debug.Log(CanSpawn);
-        } while (!CanSpawn && rooms.Count > 0 && Failsafe < 1000);      
-        
-        return CanSpawn;
-    }
     #endregion
     #region GetRooms
     private RoomSO GetRandomRoom(List<RoomSO> RoomList)
