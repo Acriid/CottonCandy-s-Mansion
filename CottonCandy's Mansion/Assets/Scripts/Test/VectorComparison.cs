@@ -6,7 +6,7 @@ public class VectorComparison : MonoBehaviour
     public Vector3 vector2;
     void Awake()
     {
-        Debug.Log(CompareVectors(vector1, vector2));
+        //Debug.Log(CompareVectors(vector1, vector2));
     }
     private Vector3 CompareVectors(Vector3 a, Vector3 b)
     {

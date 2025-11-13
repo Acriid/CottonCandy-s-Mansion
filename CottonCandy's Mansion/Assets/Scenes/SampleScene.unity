@@ -15909,7 +15909,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &635960234
 Transform:
   m_ObjectHideFlags: 0
@@ -18111,6 +18111,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoomManager
   roomParent: {fileID: 518790662}
+  RoomtoSpawn: {fileID: 11400000, guid: 7843f392e799a4f48834279c529839e9, type: 2}
+  RoomtoSpawn2: {fileID: 11400000, guid: cbfb6ca4433a240429b4ba9bc8ded354, type: 2}
 --- !u!1 &756362272
 GameObject:
   m_ObjectHideFlags: 0
@@ -24752,7 +24754,7 @@ Transform:
   m_GameObject: {fileID: 1174544225}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -14.12, y: 0, z: 0}
+  m_LocalPosition: {x: -49.43, y: 0, z: -0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -32522,7 +32524,7 @@ Transform:
   m_GameObject: {fileID: 1465800957}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -50.02, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -40899,53 +40901,6 @@ MonoBehaviour:
   m_SelectedFaces: 
   m_SelectedEdges: []
   m_SelectedVertices: 
---- !u!1 &2039774873
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2039774874}
-  - component: {fileID: 2039774875}
-  m_Layer: 0
-  m_Name: RoomTest
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &2039774874
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2039774873}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2039774875
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2039774873}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a7127bef713fd934f9067d20764daba1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RoomTransformTest
-  roomSO: {fileID: 11400000, guid: 320f91759b55218489b962ca8e5dcd94, type: 2}
-  roomToRotateTo: {fileID: 1174544225}
-  roomToRotateFrom: {fileID: 1465800957}
 --- !u!1 &2047121059
 GameObject:
   m_ObjectHideFlags: 0
@@ -45676,4 +45631,3 @@ SceneRoots:
   - {fileID: 1596462864}
   - {fileID: 1465800958}
   - {fileID: 1174544227}
-  - {fileID: 2039774874}
