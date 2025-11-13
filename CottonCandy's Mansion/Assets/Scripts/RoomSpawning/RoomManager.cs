@@ -68,16 +68,11 @@ public class RoomManager : MonoBehaviour
         List<GameObject> CurrentLevel = new();
         //new Quaternion(1f,0.5f,0f,0f)
         RoomSO randomRoom = GetRandomRoom(RoomList);
-        GameObject CurrentRoom = Instantiate(RoomtoSpawn.MainRoom, Vector3.zero, new Quaternion(1f, 0.5f, 0f, 0f), roomParent);
-
-        Vector3 RoomPosition = GetNewRoomPosition(RoomtoSpawn, CurrentRoom);
-        Debug.Log(RoomPosition);
+        GameObject CurrentRoom = Instantiate(RoomtoSpawn.MainRoom, Vector3.zero,new Quaternion(1f,0.5f,0f,0f) , roomParent);
+        Vector3 RoomPosition = GetNewRoomPosition(RoomtoSpawn2, CurrentRoom);
         Quaternion RoomRotation = GetRoomRotation(CurrentRoom);
-        Debug.Log(RoomRotation);
-
-        Vector3 RoomPosition2 = GPTGetNewRoomPosition(RoomtoSpawn2, RoomtoSpawn,RoomPosition,RoomRotation);
-        //Quaternion RoomRotation2 = GetRoomRotation(CurrentRoom);
-        Instantiate(RoomtoSpawn.MainRoom, RoomPosition, RoomRotation, roomParent);
+        Debug.Log(CurrentRoom.transform.position);
+        Instantiate(RoomtoSpawn2.MainRoom, RoomPosition, RoomRotation, roomParent);
 
     }
     private void SpawnLevel(int levelSize)
@@ -163,7 +158,7 @@ public class RoomManager : MonoBehaviour
         Vector3 roomOffset = roomRotation * halfRoomSize;
         float forwardDot = Vector3.Dot(roomOffset, newForward);
         Vector3 roomScaleOffset = forwardDot * newForward;
-
+        Debug.Log(spawnDoor.position);
         // --- Step 5: Compute final position ---
         Vector3 newRoomPosition = spawnDoor.position + roomScaleOffset + heightOffset + newForward /2f;
 
@@ -172,82 +167,39 @@ public class RoomManager : MonoBehaviour
 
     private Vector3 GetNewRoomPosition(RoomSO roomToSpawn, RoomSO CurrentRoom, Vector3 RoomPosition, Quaternion RoomRotation)
     {
-        // --- Step 1: Get references ---
-        Transform spawnDoor = CurrentRoom.MainRoom.transform.Find(DoorString);
-        Transform upperOffset = CurrentRoom.MainRoom.transform.Find(UpperOffsetString);
-        Transform lowerOffset = roomToSpawn.MainRoom.transform.Find(LowerOffsetString);
+        Vector3 CurrentRoomDimensions = RoomPosition;
+        Transform UpperOffset = CurrentRoom.MainRoom.transform.Find(UpperOffsetString);
+        Transform LowerOffset = roomToSpawn.MainRoom.transform.Find(LowerOffsetString);
+        Vector3 HeightOffset = Vector3.zero;
 
-        // --- Step 2: Get direction and rotation ---
-        spawnDoor.position = RoomRotation * spawnDoor.position + RoomPosition;
-        Vector3 newForward = -spawnDoor.forward.normalized; // opposite of current door’s forward
-        Vector3 spawnDoorForward = -spawnDoor.forward;
-        Vector3 spawnDoorUp = spawnDoor.up;
-        Quaternion roomRotation = Quaternion.LookRotation(spawnDoorForward, spawnDoorUp);
-
-        // --- Step 3: Height offset ---
-        Vector3 heightOffset = Vector3.zero;
-        if (upperOffset != null) heightOffset.y += upperOffset.localPosition.y;
-        if (lowerOffset != null) heightOffset.y += Mathf.Abs(lowerOffset.localPosition.y);
-        heightOffset = roomRotation * heightOffset;
-
-        // --- Step 4: Room offset along spawn direction ---
-        Vector3 halfRoomSize = roomToSpawn.RoomSize / 2f;
-        Vector3 roomOffset = roomRotation * halfRoomSize;
-        float forwardDot = Vector3.Dot(roomOffset, newForward);
-        Vector3 roomScaleOffset = forwardDot * newForward;
-
-        // --- Step 5: Compute final position ---
-        Vector3 newRoomPosition = spawnDoor.position + roomScaleOffset + heightOffset + newForward / 2f;
-
-        return newRoomPosition;
-    }
-    private Vector3 GPTGetNewRoomPosition(RoomSO roomToSpawn, RoomSO currentRoom, Vector3 roomPosition, Quaternion roomRotation)
-    {
-        // --- Step 1: Get reference points from ScriptableObjects ---
-        Transform spawnDoor = currentRoom.MainRoom.transform.Find(DoorString);
-        Transform upperOffset = currentRoom.MainRoom.transform.Find(UpperOffsetString);
-        Transform lowerOffset = roomToSpawn.MainRoom.transform.Find(LowerOffsetString);
-
-        if (spawnDoor == null)
+        if (UpperOffset != null)
         {
-            Debug.LogError($"Door '{DoorString}' not found in {currentRoom.MainRoom.name}");
-            return roomPosition;
+            HeightOffset.y += UpperOffset.localPosition.y;
+
+        }
+        if (LowerOffset != null)
+        {
+            HeightOffset.y += Mathf.Abs(LowerOffset.localPosition.y);
         }
 
-        // --- Step 2: Get direction and rotation ---
-        // Door forward in world space (rotated by current room's rotation)
-        Vector3 doorForward = roomRotation * spawnDoor.forward;
-        Vector3 newForward = -doorForward.normalized; // opposite of door direction
+        Transform spawnDoor = CurrentRoom.MainRoom.transform.Find(DoorString);
+        Vector3 doorForward = spawnDoor.forward * -1;
+        doorForward = RoomRotation * doorForward;
 
-        // --- Step 3: Height offset (in world space) ---
-        Vector3 heightOffset = Vector3.zero;
-        if (upperOffset != null)
-            heightOffset.y += upperOffset.localPosition.y;
-        if (lowerOffset != null)
-            heightOffset.y += Mathf.Abs(lowerOffset.localPosition.y);
 
-        // Rotate height offset into world orientation
-        heightOffset = roomRotation * heightOffset;
+        Vector3 ResultVector = CompareVectors(CurrentRoomDimensions, doorForward, 0.001f);
+        Vector3 newDoorPosition = Vector3.Scale(Vector3.Scale(spawnDoor.position + CurrentRoomDimensions, doorForward), doorForward);
+        Vector3 newSpawn = newDoorPosition + doorForward / 2f + Vector3.Scale(RoomRotation * roomToSpawn.RoomSize / 2f, doorForward) +
+        Vector3.Scale(CurrentRoomDimensions, ResultVector);
 
-        // --- Step 4: Room offset along spawn direction ---
-        Vector3 halfRoomSize = roomToSpawn.RoomSize / 2f;
-        Vector3 roomOffset = roomRotation * halfRoomSize;
-        float forwardDot = Vector3.Dot(roomOffset, newForward);
-        Vector3 roomScaleOffset = forwardDot * newForward;
 
-        // --- Step 5: Compute world position of the door (in current room space) ---
-        Vector3 worldSpawnDoorPos = roomPosition + (roomRotation * (spawnDoor.localPosition));
-
-        // --- Step 6: Compute final new room position ---
-        Vector3 newRoomPosition = worldSpawnDoorPos + roomScaleOffset + heightOffset + newForward / 2f;
-        Debug.Log(newRoomPosition);
-        return newRoomPosition;
+        return newSpawn;
     }
     private Quaternion GetRoomRotation(GameObject CurrentRoom)
     {
         //Gets room and door
         Transform spawnDoor = CurrentRoom.transform.Find(DoorString);
-        //Gets new Rotation
+        //Mirrors forward
         Vector3 newForward = -spawnDoor.forward;
         Vector3 newUp = spawnDoor.up;
 
@@ -255,6 +207,49 @@ public class RoomManager : MonoBehaviour
 
         return result;
     }
+private Vector3 GPTGetNewRoomPosition(RoomSO roomToSpawn, RoomSO currentRoom, Vector3 roomPosition, Quaternion roomRotation)
+{
+    // --- Step 1: Get reference points from ScriptableObjects ---
+    Transform spawnDoor = currentRoom.MainRoom.transform.Find(DoorString);
+    Transform upperOffset = currentRoom.MainRoom.transform.Find(UpperOffsetString);
+    Transform lowerOffset = roomToSpawn.MainRoom.transform.Find(LowerOffsetString);
+
+    if (spawnDoor == null)
+    {
+        Debug.LogError($"Door '{DoorString}' not found in {currentRoom.MainRoom.name}");
+        return roomPosition;
+    }
+
+    // --- Step 2: Get direction and rotation ---
+    // Door forward in world space (rotated by current room's rotation)
+    Vector3 doorForward = roomRotation * spawnDoor.forward;
+    Vector3 newForward = -doorForward.normalized; // opposite of door direction
+
+    // --- Step 3: Height offset (in world space) ---
+    Vector3 heightOffset = Vector3.zero;
+    if (upperOffset != null)
+        heightOffset.y += upperOffset.localPosition.y;
+    if (lowerOffset != null)
+        heightOffset.y += Mathf.Abs(lowerOffset.localPosition.y);
+
+    // Rotate height offset into world orientation
+    heightOffset = roomRotation * heightOffset;
+
+    // --- Step 4: Room offset along spawn direction ---
+    Vector3 halfRoomSize = roomToSpawn.RoomSize / 2f;
+    Vector3 roomOffset = roomRotation * halfRoomSize;
+    float forwardDot = Vector3.Dot(roomOffset, newForward);
+    Vector3 roomScaleOffset = forwardDot * newForward;
+
+    // --- Step 5: Compute world position of the door (in current room space) ---
+    Vector3 worldSpawnDoorPos = roomPosition + (roomRotation * (spawnDoor.localPosition));
+
+    // --- Step 6: Compute final new room position ---
+    Vector3 newRoomPosition = worldSpawnDoorPos + roomScaleOffset + heightOffset + newForward / 2f;
+
+    return newRoomPosition;
+}
+
     #endregion
     private bool CheckIfCanContinue(RoomSO roomToCheck, GameObject CurrentRoom, List<RoomSO> RoomList, List<Bounds> BoundsList)
     {
