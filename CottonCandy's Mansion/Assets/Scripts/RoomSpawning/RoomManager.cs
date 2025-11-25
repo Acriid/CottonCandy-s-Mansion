@@ -17,7 +17,6 @@ public class RoomManager : MonoBehaviour
     private Dictionary<RoomSO.RoomType, List<RoomSO>> RoomDictionary = new();
     private List<RoomSO> SpecificRoomsList = new();
     private List<RoomSO> rooms = new();
-    public List<Bounds> LevelBounds = new();
     public List<GameObject> Level = new();
     public RoomSO RoomtoSpawn;
     public RoomSO RoomtoSpawn2;
@@ -86,23 +85,15 @@ public class RoomManager : MonoBehaviour
     {
         GameObject CurrentRoom = Instantiate(RoomtoSpawn.MainRoom, Vector3.zero, Quaternion.identity, roomParent);
         Vector3 RoomSize = GetNewRoomSize(RoomtoSpawn,Quaternion.identity);
-        Bounds bounds = new(Vector3.zero,RoomSize);
-        LevelBounds.Add(bounds);
+
         
         Quaternion RoomRotation = GetRoomRotation(RoomtoSpawn,Quaternion.identity);
         Vector3 RoomPosition = GetNewRoomPosition(RoomtoSpawn2,CurrentRoom);
         RoomSize = GetNewRoomSize(RoomtoSpawn2,RoomRotation);
-        bounds = new(RoomPosition,RoomSize);
-        LevelBounds.Add(bounds);
 
         SpawnRoom(RoomtoSpawn2,RoomPosition,RoomRotation);
 
-        foreach(Bounds boundss in LevelBounds)
-        {
-            GameObject BoundsObject= Instantiate(TestBoundsObj,boundss.center,Quaternion.identity);
-            BoundsObject.transform.localScale = boundss.size;
-            BoundsObject.GetComponent<MeshRenderer>().material = TestObjMat;
-        }
+
     }
     private void SpawnLevel(int LevelSize)
     {
@@ -111,14 +102,11 @@ public class RoomManager : MonoBehaviour
 
         RoomSO RandomRoom = GetRandomRoom(RoomList);
         Vector3 RoomPosition = Vector3.zero;
-        Quaternion RoomRotation = new(1f, 0.5f, 0f, 0f);
+        Quaternion RoomRotation = Quaternion.identity;
+        Vector3 NewRoomSize = GetNewRoomSize(RandomRoom,RoomRotation);
 
         GameObject CurrentRoom = SpawnRoom(RandomRoom,RoomPosition,RoomRotation);
 
-        Vector3 NewRoomSize = GetNewRoomSize(RandomRoom,RoomRotation);
-        Bounds RoomBounds = new(RoomPosition,NewRoomSize);
-
-        LevelBounds.Add(RoomBounds);
         Level.Add(CurrentRoom);
 
         int Count = 0;
@@ -130,14 +118,13 @@ public class RoomManager : MonoBehaviour
             RoomPosition = GetNewRoomPosition(RandomRoom,CurrentRoom);
             RoomRotation = GetRoomRotation(CurrentRoom);
             NewRoomSize = GetNewRoomSize(RandomRoom,RoomRotation);
-            RoomBounds = new(RoomPosition,NewRoomSize);
-            
-            if(TestIfCanSpawn(RoomBounds,LevelBounds))
+
+            if(!OverLapRoom(NewRoomSize,RoomPosition,RoomRotation) && TestIfRoomCanSpawn(RandomRoom,RoomPosition,RoomRotation))
             {
                 if(RoomList.Count != InitialCount){RoomList = new(GetRoomList(RoomSO.RoomType.Hallway));}
                 CurrentRoom = SpawnRoom(RandomRoom,RoomPosition,RoomRotation);
 
-                LevelBounds.Add(RoomBounds);
+
                 Level.Add(CurrentRoom);
                 Count++;
             }
@@ -145,19 +132,21 @@ public class RoomManager : MonoBehaviour
             {
                 RoomList.Remove(RandomRoom);
             }
-            FailSafe++;
-        }
 
-        foreach(Bounds bounds in LevelBounds)
-        {
-            GameObject BoundsObject= Instantiate(TestBoundsObj,bounds.center,Quaternion.identity);
-            BoundsObject.transform.localScale = bounds.size;
-            BoundsObject.GetComponent<MeshRenderer>().material = TestObjMat;
+            FailSafe++;
         }
     }
     private GameObject SpawnRoom(RoomSO roomToSpawn, Vector3 Position, Quaternion Rotation)
     {
         return Instantiate(roomToSpawn.MainRoom,Position,Rotation,roomParent);
+    }
+    private bool OverLapRoom(Vector3 RoomSize, Vector3 RoomPos, Quaternion RoomRotation)
+    {
+        return Physics.CheckBox(
+            RoomPos,
+            RoomSize/2f,
+            RoomRotation
+        );
     }
     private bool TestIfRoomCanSpawn(RoomSO roomToCheck, Vector3 RoomPosition, Quaternion RoomRotation)
     {
@@ -167,26 +156,22 @@ public class RoomManager : MonoBehaviour
         
         //Get Room Position/Rotation
         Quaternion NewRoomRotation = GetRoomRotation(roomToCheck,RoomRotation);
-        Vector3 NewRoomPosition = GetNewRoomPosition(TestRoom,roomToCheck,RoomPosition,NewRoomRotation);
-        Vector3 NewSize = GetNewRoomSize(TestRoom,NewRoomRotation);
-        Bounds TestBounds = new(NewRoomPosition,NewSize);
+        Vector3 NewRoomPosition = GetNewRoomPosition(TestRoom,roomToCheck,RoomPosition,RoomRotation);
+        Vector3 NewRoomSize = GetNewRoomSize(TestRoom,NewRoomRotation);
 
-        bool CanSpawn = TestIfCanSpawn(TestBounds,LevelBounds);
-
-        while(!CanSpawn && TestList.Count > 0)
+        bool CanSpawn = OverLapRoom(NewRoomSize,NewRoomPosition,NewRoomRotation);
+        while(CanSpawn && TestList.Count > 0)
         {
             if(!TestList.Remove(TestRoom)) {Debug.Log("Oh Fuck");}
             TestRoom = GetRandomRoom(TestList);
             if(TestRoom == null){break;}
             //New Room Stuff
-            NewRoomPosition = GetNewRoomPosition(TestRoom,roomToCheck,RoomPosition,NewRoomRotation);
-            NewSize = GetNewRoomSize(TestRoom,NewRoomRotation);
-            TestBounds = new(NewRoomPosition,NewSize);
-
-            CanSpawn = TestIfCanSpawn(TestBounds,LevelBounds);
+            NewRoomPosition = GetNewRoomPosition(TestRoom,roomToCheck,RoomPosition,RoomRotation);
+            NewRoomSize = GetNewRoomSize(TestRoom,NewRoomRotation);
+            CanSpawn = OverLapRoom(NewRoomSize,NewRoomPosition,NewRoomRotation);
         }
 
-        return CanSpawn;
+        return !CanSpawn;
     }
     private RoomSO GetNextRoom()
     {
@@ -230,7 +215,6 @@ public class RoomManager : MonoBehaviour
     {
         // --- Step 1: Find key transforms in the prefab ---
         Transform spawnDoor = currentRoom.MainRoom.transform.Find(DoorString);
-        Transform upperOffset = currentRoom.MainRoom.transform.Find(UpperOffsetString);
         Transform lowerOffset = roomToSpawn.MainRoom.transform.Find(LowerOffsetString);
 
         if (spawnDoor == null)
@@ -248,12 +232,10 @@ public class RoomManager : MonoBehaviour
         Vector3 newForward = -doorForward.normalized;
 
         // --- Step 4: Compute the door’s world-space position ---
-        Vector3 worldSpawnDoorPos = roomPosition + (normalizedRot * spawnDoor.position);
+        Vector3 worldSpawnDoorPos = roomPosition + (normalizedRot * spawnDoor.localPosition);
 
         // --- Step 5: Handle height offset ---
         Vector3 heightOffset = Vector3.zero;
-       // if (upperOffset != null)
-        //    heightOffset.y += upperOffset.localPosition.y;
         if (lowerOffset != null)
             heightOffset.y += Mathf.Abs(lowerOffset.localPosition.y);
 
@@ -297,9 +279,7 @@ public class RoomManager : MonoBehaviour
         Vector3 worldForward = roomRotation * -spawnDoor.forward;
         Vector3 worldUp = roomRotation * spawnDoor.up;
 
-        // --- Step 3: Mirror the forward direction (so next room faces opposite) ---
-
-        // --- Step 4: Create new rotation using both forward and up directions ---
+        // --- Step 3: Create new rotation using both forward and up directions ---
         Quaternion result = Quaternion.LookRotation(worldForward, worldUp);
         return result;
     }
@@ -344,17 +324,6 @@ public class RoomManager : MonoBehaviour
         if (RemoveList.Count == 0) { return; }
         RemoveList.Remove(removeValue);
     }  
-    private bool TestIfCanSpawn(Bounds SpawnBounds, List<Bounds> CompareBounds)
-    {
-        foreach(Bounds bounds in CompareBounds)
-        {
-            if(bounds.Intersects(SpawnBounds))
-            {
-                return false;
-            }
-        }
-        return true;
-    }
 
 }
 
