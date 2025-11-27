@@ -15,5 +15,5 @@ MonoBehaviour:
   RoomName: 
   RoomDescription: 
   MainRoom: {fileID: 7264008478346860257, guid: b15844c29ee280840b08c29aee5072ac, type: 3}
-  RoomSize: {x: 27, y: 13, z: 27}
+  RoomSize: {x: 27, y: 7, z: 27}
   Type: 0

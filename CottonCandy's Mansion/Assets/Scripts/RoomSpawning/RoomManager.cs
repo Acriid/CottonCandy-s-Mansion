@@ -98,39 +98,31 @@ public class RoomManager : MonoBehaviour
     private void SpawnLevel(int LevelSize)
     {
         List<RoomSO> RoomList = new(GetRoomList(RoomSO.RoomType.Hallway));
-        int InitialCount = RoomList.Count;
 
         RoomSO RandomRoom = GetRandomRoom(RoomList);
-        Vector3 RoomPosition = Vector3.zero;
-        Quaternion RoomRotation = Quaternion.identity;
-        Vector3 NewRoomSize = GetNewRoomSize(RandomRoom,RoomRotation);
+        Vector3 RoomPosition = roomParent.transform.position;
+        Quaternion RoomRotation = roomParent.transform.rotation;
 
         GameObject CurrentRoom = SpawnRoom(RandomRoom,RoomPosition,RoomRotation);
 
         Level.Add(CurrentRoom);
 
-        int Count = 0;
         int FailSafe = 0;
 
-        while(Count < LevelSize && FailSafe < 100 && RoomList.Count > 0)
+        while(Level.Count < LevelSize && FailSafe < 100 && RoomList.Count > 0)
         {
             RandomRoom = GetRandomRoom(RoomList);
+            RoomList.Remove(RandomRoom);
             RoomPosition = GetNewRoomPosition(RandomRoom,CurrentRoom);
             RoomRotation = GetRoomRotation(CurrentRoom);
-            NewRoomSize = GetNewRoomSize(RandomRoom,RoomRotation);
 
-            if(!OverLapRoom(NewRoomSize,RoomPosition,RoomRotation) && TestIfRoomCanSpawn(RandomRoom,RoomPosition,RoomRotation))
+            if(!OverLapRoom(RandomRoom.RoomSize,RoomPosition,RoomRotation) && TestIfRoomCanSpawn(RandomRoom,RoomPosition,RoomRotation))
             {
-                if(RoomList.Count != InitialCount){RoomList = new(GetRoomList(RoomSO.RoomType.Hallway));}
+                RoomList = new(GetRoomList(RoomSO.RoomType.Hallway));
                 CurrentRoom = SpawnRoom(RandomRoom,RoomPosition,RoomRotation);
 
-
+                SpawnBox(RandomRoom.RoomSize,RoomPosition,RoomRotation);
                 Level.Add(CurrentRoom);
-                Count++;
-            }
-            else
-            {
-                RoomList.Remove(RandomRoom);
             }
 
             FailSafe++;
@@ -142,36 +134,49 @@ public class RoomManager : MonoBehaviour
     }
     private bool OverLapRoom(Vector3 RoomSize, Vector3 RoomPos, Quaternion RoomRotation)
     {
-        return Physics.CheckBox(
+
+        bool Check = Physics.CheckBox(
             RoomPos,
-            RoomSize/2f,
+            (RoomSize - Vector3.one)/2f,
             RoomRotation
         );
+        return Check;
+    }
+    private void SpawnBox(Vector3 RoomSize, Vector3 RoomPos, Quaternion RoomRotation)
+    {
+        GameObject CurrentObj = Instantiate(TestBoundsObj,RoomPos,RoomRotation);
+        CurrentObj.GetComponent<MeshRenderer>().material = TestObjMat;
+        CurrentObj.transform.localScale = RoomSize - Vector3.one;
     }
     private bool TestIfRoomCanSpawn(RoomSO roomToCheck, Vector3 RoomPosition, Quaternion RoomRotation)
     {
-        //Get RoomList
-        List<RoomSO> TestList = new(GetRoomList(RoomSO.RoomType.Hallway));
-        RoomSO TestRoom = GetRandomRoom(TestList);
-        
-        //Get Room Position/Rotation
-        Quaternion NewRoomRotation = GetRoomRotation(roomToCheck,RoomRotation);
-        Vector3 NewRoomPosition = GetNewRoomPosition(TestRoom,roomToCheck,RoomPosition,RoomRotation);
-        Vector3 NewRoomSize = GetNewRoomSize(TestRoom,NewRoomRotation);
+        //Get CurrentRooms that can spawn
+        List<RoomSO> RoomList = new(GetRoomList(RoomSO.RoomType.Hallway));
+        //Get Random Room From list
+        RoomSO TestRoom = GetRandomRoom(RoomList);
+        //Get Test Room Position
+        Vector3 TestRoomPosition = GetNewRoomPosition(TestRoom,roomToCheck,RoomPosition,RoomRotation);
+        //Get Test Room ROtation
+        Quaternion TestRoomRotation = GetRoomRotation(roomToCheck,RoomRotation);
+        //Check if room can spawn
+        bool Result = OverLapRoom(TestRoom.RoomSize,TestRoomPosition,TestRoomRotation);
+        //First remove from RoomList
+        RoomList.Remove(TestRoom);
 
-        bool CanSpawn = OverLapRoom(NewRoomSize,NewRoomPosition,NewRoomRotation);
-        while(CanSpawn && TestList.Count > 0)
+        //Loop to check all possible spawn rooms
+        while(Result && RoomList.Count > 0)
         {
-            if(!TestList.Remove(TestRoom)) {Debug.Log("Oh Fuck");}
-            TestRoom = GetRandomRoom(TestList);
-            if(TestRoom == null){break;}
-            //New Room Stuff
-            NewRoomPosition = GetNewRoomPosition(TestRoom,roomToCheck,RoomPosition,RoomRotation);
-            NewRoomSize = GetNewRoomSize(TestRoom,NewRoomRotation);
-            CanSpawn = OverLapRoom(NewRoomSize,NewRoomPosition,NewRoomRotation);
+            //Get new room
+            TestRoom = GetRandomRoom(RoomList);
+            //Remove Room from list
+            RoomList.Remove(TestRoom);
+            //Get new Room Position (Room Rotation always stays the same)
+            TestRoomPosition = GetNewRoomPosition(TestRoom,roomToCheck,RoomPosition,RoomRotation);
+            //Test if room can spawn
+            Result = OverLapRoom(TestRoom.RoomSize,TestRoomPosition,TestRoomRotation); 
         }
 
-        return !CanSpawn;
+        return !Result;
     }
     private RoomSO GetNextRoom()
     {
@@ -211,6 +216,7 @@ public class RoomManager : MonoBehaviour
 
         return newRoomPosition;
     }
+    //Needs a spawnroom , current room, current room position, current room rotation.
     private Vector3 GetNewRoomPosition(RoomSO roomToSpawn, RoomSO currentRoom, Vector3 roomPosition, Quaternion roomRotation)
     {
         // --- Step 1: Find key transforms in the prefab ---
@@ -303,7 +309,7 @@ public class RoomManager : MonoBehaviour
             return null;
         }
         //Gets Random Room From list
-        int UpperBoundry = RoomList.Count - 1;
+        int UpperBoundry = RoomList.Count;
         int RandomRoom = UnityEngine.Random.Range(0, UpperBoundry);
         RoomSO result = RoomList[RandomRoom];
 
