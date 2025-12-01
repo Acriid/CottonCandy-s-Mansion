@@ -3,5 +3,20 @@ using UnityEngine.InputSystem;
 
 public class Player : MonoBehaviour
 {
-    public InputActions InputActions {get; private set;}
+    void Awake()
+    {
+        InputManager.Instance.OnInitialized += InitializeActions;
+    }
+    void OnDestroy()
+    {
+        OnDisable();
+    }
+    void OnDisable()
+    {
+        InputManager.Instance.OnInitialized -= InitializeActions;
+    }
+    private void InitializeActions()
+    {
+        
+    }
 }

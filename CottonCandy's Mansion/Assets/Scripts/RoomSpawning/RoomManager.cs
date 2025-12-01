@@ -10,16 +10,22 @@ using Unity.VisualScripting;
 public class RoomManager : MonoBehaviour
 {
     #region Global vars
+
     public GameObject TestBoundsObj;
     public Material TestObjMat;
+
     public static RoomManager instance;
+
     public Transform roomParent;
+
     private Dictionary<RoomSO.RoomType, List<RoomSO>> RoomDictionary = new();
     private List<RoomSO> SpecificRoomsList = new();
     private List<RoomSO> rooms = new();
     public List<GameObject> Level = new();
+
     public RoomSO RoomtoSpawn;
     public RoomSO RoomtoSpawn2;
+
     #region String Constants
     //Doors
     const string DoorString = "Structure/Doors/Door_Next";
@@ -29,6 +35,7 @@ public class RoomManager : MonoBehaviour
     //Room Loading
     const string LoadLable = "Room";
     #endregion
+    
     #endregion
     async void Awake()
     {
@@ -140,6 +147,7 @@ public class RoomManager : MonoBehaviour
             (RoomSize - Vector3.one)/2f,
             RoomRotation
         );
+
         return Check;
     }
     private void SpawnBox(Vector3 RoomSize, Vector3 RoomPos, Quaternion RoomRotation)
@@ -272,20 +280,20 @@ public class RoomManager : MonoBehaviour
     }
     private Quaternion GetRoomRotation(RoomSO currentRoom, Quaternion roomRotation)
     {
-        // --- Step 1: Find the door in the prefab ---
+        // Find Door Prefab
         Transform spawnDoor = currentRoom.MainRoom.transform.Find(DoorString);
 
         if (spawnDoor == null)
         {
             Debug.LogError($"Door '{DoorString}' not found in {currentRoom.MainRoom.name}");
-            return roomRotation; // Fallback to current rotation
+            return roomRotation; 
         }
 
-        // --- Step 2: Convert door orientation from local to world space ---
+        // Get new forward
         Vector3 worldForward = roomRotation * -spawnDoor.forward;
         Vector3 worldUp = roomRotation * spawnDoor.up;
 
-        // --- Step 3: Create new rotation using both forward and up directions ---
+        // Return rotation from that forward
         Quaternion result = Quaternion.LookRotation(worldForward, worldUp);
         return result;
     }
