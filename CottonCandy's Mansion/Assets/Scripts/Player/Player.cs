@@ -3,9 +3,10 @@ using UnityEngine.InputSystem;
 
 public class Player : MonoBehaviour
 {
+    [SerializeField] private InputReader _inputReader;
     void Awake()
     {
-        InputManager.Instance.OnInitialized += InitializeActions;
+
     }
     void OnDestroy()
     {
@@ -13,10 +14,11 @@ public class Player : MonoBehaviour
     }
     void OnDisable()
     {
-        InputManager.Instance.OnInitialized -= InitializeActions;
+
     }
     private void InitializeActions()
     {
-        
+        _inputReader.EnableLookAction();
+        _inputReader.EnableMoveAction(); 
     }
 }

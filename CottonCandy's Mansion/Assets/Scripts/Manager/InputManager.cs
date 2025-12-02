@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class InputManager : MonoBehaviour
 {
-    public static InputManager Instance {get; private set;}
+    /*public static InputManager Instance {get; private set;}
     public InputActions InputActions {get; private set;}
     public event Action OnInitialized;
     void Awake()
@@ -17,5 +17,5 @@ public class InputManager : MonoBehaviour
 
     void OnDisable() => DisableInput();
     void InitializeInput() => InputActions ??= new();
-    void DisableInput(){if (InputActions != null)  InputActions = null;}
+    void DisableInput(){if (InputActions != null)  InputActions = null;}*/
 }
