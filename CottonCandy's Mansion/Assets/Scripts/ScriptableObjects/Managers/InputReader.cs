@@ -1,4 +1,5 @@
 using System;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -43,7 +44,7 @@ public class InputReader : ScriptableObject
         OnDisable();
     }
 
-
+    
 
     public void EnableMoveAction()
     {
@@ -64,7 +65,7 @@ public class InputReader : ScriptableObject
 
 
 
-    private void SubscribeActions()
+    public void SubscribeActions()
     {
         _moveAction.performed += movePerformed;
         _moveAction.canceled += moveCancled;
@@ -73,7 +74,7 @@ public class InputReader : ScriptableObject
         _lookAction.canceled += lookCancled;
     }
 
-    private void UnSubscrubeActions()
+    public void UnSubscrubeActions()
     {
         _moveAction.performed -= movePerformed;
         _moveAction.canceled -= moveCancled;
