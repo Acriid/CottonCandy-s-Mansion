@@ -8,9 +8,15 @@ public class Player : MonoBehaviour
     [SerializeField] private CharacterController _characterController;
     [SerializeField] private float _playerSpeed;
     [SerializeField] private Transform _orientation;
+    [SerializeField] private float _lookSensitivity;
 
     private Vector2 _moveInput;
     
+
+    private float _xRotation = 0f;
+    private float _yRotation = 0f;
+    [SerializeField] private float _maxLookRange;
+    [SerializeField] private Transform _cameraTransform;
 
 
     public PlayerStateMachine StateMachine {get; set;}
@@ -20,10 +26,16 @@ public class Player : MonoBehaviour
     {
         if(_inputReader == null){Debug.LogError("InputReader does not exists"); return;}
 
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+        _inputReader.EnableLookAction();
+
+
         StateMachine = new();
         WalkingState = new(this,StateMachine);
 
         _inputReader.OnMove += UpdateMoveInput;
+        _inputReader.OnLook += CameraMovement;
     }
 
     void Start()
@@ -36,11 +48,13 @@ public class Player : MonoBehaviour
     }
     void OnDisable()
     {
-        _inputReader.OnMove += UpdateMoveInput;
+        _inputReader.OnMove -= UpdateMoveInput;
+        _inputReader.OnLook -= CameraMovement;
     }
     void Update()
     {
         StateMachine.CurrentState.FrameUpdate();
+        RotateCamera();
     }
     void FixedUpdate()
     {
@@ -58,6 +72,22 @@ public class Player : MonoBehaviour
 
 
 
+    private void CameraMovement(Vector2 direction)
+    {
+        float lookX = direction.x * _lookSensitivity * Time.deltaTime * 0.25f;
+        float lookY = direction.y * _lookSensitivity * Time.deltaTime * 0.25f;
+
+        _yRotation += lookX;
+        _xRotation -= lookY;
+
+        _xRotation = Mathf.Clamp(_xRotation,-_maxLookRange,_maxLookRange);
+    }
+    private void RotateCamera()
+    {
+        _cameraTransform.rotation = Quaternion.Euler(_xRotation, _yRotation, 0f);
+        _orientation.rotation = Quaternion.Euler(0f, _yRotation, 0f);
+        transform.rotation = Quaternion.Euler(0f, _yRotation, 0f);
+    }
 
 
 
@@ -66,6 +96,10 @@ public class Player : MonoBehaviour
 
 
 
+
+
+
+    #region  MoveInput
     public Vector2 GetMoveInput()
     {
         return _moveInput;
@@ -82,4 +116,5 @@ public class Player : MonoBehaviour
     {
         _inputReader.EnableMoveAction();
     }
+    #endregion
 }

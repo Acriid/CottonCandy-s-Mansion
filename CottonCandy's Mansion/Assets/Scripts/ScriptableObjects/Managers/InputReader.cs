@@ -45,7 +45,7 @@ public class InputReader : ScriptableObject
     }
 
     
-
+    
     public void EnableMoveAction()
     {
         _moveAction.Enable();
