@@ -1,17 +1,33 @@
+using System;
+using System.Collections;
+using TMPro;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class Player : MonoBehaviour
 {
+    //REMOVELATER
+    public TMP_Text textthing;
+    [Header("Input")]
     [SerializeField] private InputReader _inputReader;
-    [SerializeField] private CharacterController _characterController;
+    [SerializeField] private Rigidbody _rigidBody;
+    [Header("Movement")]
     [SerializeField] private float _playerSpeed;
+    [SerializeField] private float _groundDrag;
+    [SerializeField] private Transform _groundCheckPoint;
+    [SerializeField] private float _groundCheckRadius;
+    [SerializeField] private LayerMask _groundLayerMask;
+    [Header("Camera")]
     [SerializeField] private Transform _orientation;
     [SerializeField] private float _lookSensitivity;
 
     private Vector2 _moveInput;
-    
+    public Vector3 _gravityDirection;
+    public float _gravityModifier;
+    private Vector3 gravityVelocity = Vector3.zero;
+    public float RotationSpeed;
+    private Coroutine _rotateCoroutine;
 
     private float _xRotation = 0f;
     private float _yRotation = 0f;
@@ -21,6 +37,10 @@ public class Player : MonoBehaviour
 
     public PlayerStateMachine StateMachine {get; set;}
     public PlayerWalkingState WalkingState {get; set;}
+
+    private GameObject _lastObjectHit;
+    const float PLAYERSPEEDOFFSET = 10f;
+    const float PLAYERGRAVITYOFFSET = 5f;
 
     void Awake()
     {
@@ -36,6 +56,8 @@ public class Player : MonoBehaviour
 
         _inputReader.OnMove += UpdateMoveInput;
         _inputReader.OnLook += CameraMovement;
+
+        _rigidBody.freezeRotation = true;
     }
 
     void Start()
@@ -63,38 +85,129 @@ public class Player : MonoBehaviour
 
     public void MovePlayer(Vector2 direction)
     {
+        // --- MOVEMENT FORCE (keep applying as before) ---
         Vector3 moveDirection = _orientation.forward * direction.y + _orientation.right * direction.x;
-        _characterController.Move(moveDirection * _playerSpeed);
+        _rigidBody.AddForce(_playerSpeed * PLAYERSPEEDOFFSET * moveDirection.normalized, ForceMode.Force);
+
+        // --- MANUAL GRAVITY INTEGRATION (frame-rate stable) ---
+        // Integrate gravity directly into velocity (instead of AddForce) to avoid solver pushing effects.
+        if (!CheckIfGrounded())
+        {
+            // Increase downward velocity by gravity * dt
+            _rigidBody.linearVelocity += _gravityModifier * PLAYERGRAVITYOFFSET * Time.fixedDeltaTime * _gravityDirection.normalized;
+        }
+        else
+        {
+            // If grounded, optionally keep a small downward "stick" velocity so character keeps contact
+            Vector3 gravityComp = Vector3.Project(_rigidBody.linearVelocity, _gravityDirection);
+            if (Vector3.Dot(gravityComp, _gravityDirection) < 0f)
+            {
+                // remove negative (into-ground) vertical component when grounded
+                _rigidBody.linearVelocity -= gravityComp;
+            }
+        }
+
+        // --- DRAG HANDLING ---
+        _rigidBody.linearDamping = CheckIfGrounded() ? _groundDrag : 0f;
+        SpeedControl();
+        textthing.text = _rigidBody.linearVelocity.magnitude.ToString();
+    }
+    private void SpeedControl()
+    {
+        Vector3 gravityComp = Vector3.Project(_rigidBody.linearVelocity, _gravityDirection);
+        if(gravityComp.magnitude > 2f*_gravityModifier)
+        {
+            gravityComp = _gravityModifier * 2f * gravityComp.normalized;
+        }
+
+        Vector3 nonGravityComp = _rigidBody.linearVelocity - gravityComp;
+        if (nonGravityComp.magnitude > _playerSpeed)
+        {
+            Vector3 newVelocity = _rigidBody.linearVelocity.normalized * _playerSpeed;
+            _rigidBody.linearVelocity = newVelocity + gravityComp;
+        }
+        
     }
 
 
 
-
-
-
+    #region  First Person Camera
     private void CameraMovement(Vector2 direction)
     {
         float lookX = direction.x * _lookSensitivity * Time.deltaTime * 0.25f;
         float lookY = direction.y * _lookSensitivity * Time.deltaTime * 0.25f;
 
-        _yRotation += lookX;
+        _yRotation = lookX;
         _xRotation -= lookY;
 
         _xRotation = Mathf.Clamp(_xRotation,-_maxLookRange,_maxLookRange);
     }
     private void RotateCamera()
     {
-        _cameraTransform.rotation = Quaternion.Euler(_xRotation, _yRotation, 0f);
-        _orientation.rotation = Quaternion.Euler(0f, _yRotation, 0f);
-        transform.rotation = Quaternion.Euler(0f, _yRotation, 0f);
+        // Apply body yaw only if there was mouse movement this frame
+        if (Mathf.Abs(_yRotation) > Mathf.Epsilon)
+        {
+            // rotate the player around its up axis by the delta yaw
+            transform.Rotate(transform.up, _yRotation, Space.World);
+        }
+
+        // Make movement orientation match player's yaw (so movement aligns with facing)
+        _orientation.rotation = Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y, transform.eulerAngles.z);
+
+        // Apply camera pitch as local rotation relative to the player
+        _cameraTransform.localRotation = Quaternion.Euler(_xRotation, 0f, 0f);
+
+        // reset per-frame yaw delta so nothing accumulates if CameraMovement isn't called
+        _yRotation = 0f;
+    }
+    #endregion
+
+
+    public void ChangeGravityDirection(Vector3 newDirection)
+    {
+        Quaternion targetRotation = Quaternion.FromToRotation(transform.up, newDirection) * transform.rotation;
+
+        if (_rotateCoroutine != null)
+            StopCoroutine(_rotateCoroutine);
+
+        _rotateCoroutine = StartCoroutine(RotateToGravity(targetRotation));
     }
 
+    private IEnumerator RotateToGravity(Quaternion targetRotation)
+    {
+        // Rotate until we're effectively at the target.
+        while (Quaternion.Angle(transform.rotation, targetRotation) > 0.01f)
+        {
+            float step = RotationSpeed * Time.deltaTime; // degrees per second -> degrees this frame
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, step);
+            yield return null;
+        }
 
+        // Snap exactly and update gravity direction
+        transform.rotation = targetRotation;
+        _gravityDirection = -transform.up;
+        _rotateCoroutine = null;
+    }
 
+    void OnCollisionEnter(Collision collision)
+    {
+        Debug.Log(collision.gameObject.name);
+        if(!collision.gameObject.CompareTag("CollisionAble")) {return;}
+        if(_lastObjectHit == collision.gameObject) {return;}
+        _lastObjectHit = collision.gameObject;
+        if(_lastObjectHit.TryGetComponent(out GravityChanger gravityChanger))
+        {
+            ChangeGravityDirection(gravityChanger.GetGravityDirection());
+        }
+        
+    }
 
-
-
-
+    private bool CheckIfGrounded()
+    {
+        Vector3 groundPoint = _groundCheckPoint.transform.position;
+        bool isGrounded = Physics.CheckSphere(groundPoint, _groundCheckRadius, _groundLayerMask);
+        return isGrounded;
+    }
 
 
 
