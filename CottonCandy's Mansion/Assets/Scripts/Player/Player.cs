@@ -15,6 +15,7 @@ public class Player : MonoBehaviour
     [Header("Movement")]
     [SerializeField] private float _playerSpeed;
     [SerializeField] private float _groundDrag;
+    [SerializeField] private float _jumpForce;
     [SerializeField] private Transform _groundCheckPoint;
     [SerializeField] private float _groundCheckRadius;
     [SerializeField] private LayerMask _groundLayerMask;
@@ -54,8 +55,7 @@ public class Player : MonoBehaviour
         StateMachine = new();
         WalkingState = new(this,StateMachine);
 
-        _inputReader.OnMove += UpdateMoveInput;
-        _inputReader.OnLook += CameraMovement;
+        SubscirbeToEvents();
 
         _rigidBody.freezeRotation = true;
     }
@@ -70,8 +70,7 @@ public class Player : MonoBehaviour
     }
     void OnDisable()
     {
-        _inputReader.OnMove -= UpdateMoveInput;
-        _inputReader.OnLook -= CameraMovement;
+        UnSubscribeFromEvents();
     }
     void Update()
     {
@@ -85,29 +84,23 @@ public class Player : MonoBehaviour
 
     public void MovePlayer(Vector2 direction)
     {
-        // --- MOVEMENT FORCE (keep applying as before) ---
+        
         Vector3 moveDirection = _orientation.forward * direction.y + _orientation.right * direction.x;
         _rigidBody.AddForce(_playerSpeed * PLAYERSPEEDOFFSET * moveDirection.normalized, ForceMode.Force);
 
-        // --- MANUAL GRAVITY INTEGRATION (frame-rate stable) ---
-        // Integrate gravity directly into velocity (instead of AddForce) to avoid solver pushing effects.
         if (!CheckIfGrounded())
         {
-            // Increase downward velocity by gravity * dt
             _rigidBody.linearVelocity += _gravityModifier * PLAYERGRAVITYOFFSET * Time.fixedDeltaTime * _gravityDirection.normalized;
         }
         else
         {
-            // If grounded, optionally keep a small downward "stick" velocity so character keeps contact
             Vector3 gravityComp = Vector3.Project(_rigidBody.linearVelocity, _gravityDirection);
             if (Vector3.Dot(gravityComp, _gravityDirection) < 0f)
             {
-                // remove negative (into-ground) vertical component when grounded
                 _rigidBody.linearVelocity -= gravityComp;
             }
         }
 
-        // --- DRAG HANDLING ---
         _rigidBody.linearDamping = CheckIfGrounded() ? _groundDrag : 0f;
         SpeedControl();
         textthing.text = _rigidBody.linearVelocity.magnitude.ToString();
@@ -115,7 +108,7 @@ public class Player : MonoBehaviour
     private void SpeedControl()
     {
         Vector3 gravityComp = Vector3.Project(_rigidBody.linearVelocity, _gravityDirection);
-        if(gravityComp.magnitude > 2f*_gravityModifier)
+        if(gravityComp.magnitude > 2f * _gravityModifier)
         {
             gravityComp = _gravityModifier * 2f * gravityComp.normalized;
         }
@@ -123,10 +116,9 @@ public class Player : MonoBehaviour
         Vector3 nonGravityComp = _rigidBody.linearVelocity - gravityComp;
         if (nonGravityComp.magnitude > _playerSpeed)
         {
-            Vector3 newVelocity = _rigidBody.linearVelocity.normalized * _playerSpeed;
-            _rigidBody.linearVelocity = newVelocity + gravityComp;
+            Vector3 clampedNonGravity = nonGravityComp.normalized * _playerSpeed;
+            _rigidBody.linearVelocity = clampedNonGravity + gravityComp;
         }
-        
     }
 
 
@@ -191,7 +183,6 @@ public class Player : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-        Debug.Log(collision.gameObject.name);
         if(!collision.gameObject.CompareTag("CollisionAble")) {return;}
         if(_lastObjectHit == collision.gameObject) {return;}
         _lastObjectHit = collision.gameObject;
@@ -209,6 +200,15 @@ public class Player : MonoBehaviour
         return isGrounded;
     }
 
+
+
+    private void OnJump()
+    {
+        Vector3 gravityComp = Vector3.Project(_rigidBody.linearVelocity, _gravityDirection);
+        _rigidBody.linearVelocity -= gravityComp;
+
+        _rigidBody.AddForce(transform.up * _jumpForce,ForceMode.Impulse);
+    }
 
 
 
@@ -230,4 +230,26 @@ public class Player : MonoBehaviour
         _inputReader.EnableMoveAction();
     }
     #endregion
+
+    public void EnableJump()
+    {
+        _inputReader.EnableJumpAciton();
+    }
+    public void DisableJump()
+    {
+        _inputReader.DisabelJumpAction();
+    }
+
+    private void SubscirbeToEvents()
+    {
+        _inputReader.OnMove += UpdateMoveInput;
+        _inputReader.OnLook += CameraMovement;
+        _inputReader.OnJump += OnJump;
+    }
+    private void UnSubscribeFromEvents()
+    {
+        _inputReader.OnMove -= UpdateMoveInput;
+        _inputReader.OnLook -= CameraMovement;
+        _inputReader.OnJump -= OnJump;
+    }
 }

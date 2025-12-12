@@ -9,9 +9,11 @@ public class InputReader : ScriptableObject
     private InputActions _inputActions;   
     private InputAction _moveAction;
     private InputAction _lookAction;
+    private InputAction _jumpAction;
 
     public event Action<Vector2> OnMove;
     public event Action<Vector2> OnLook;
+    public event Action OnJump;
 
     private Action<InputAction.CallbackContext> movePerformed;
     private Action<InputAction.CallbackContext> moveCancled; 
@@ -19,18 +21,23 @@ public class InputReader : ScriptableObject
     private Action<InputAction.CallbackContext> lookPerformed;
     private Action<InputAction.CallbackContext> lookCancled;
 
+    private Action<InputAction.CallbackContext> jumpStarted;
+
     void OnEnable()
     {
         _inputActions = new();
 
         _moveAction = _inputActions.Player.Move;
         _lookAction = _inputActions.Player.Look;
+        _jumpAction = _inputActions.Player.Jump;
 
         movePerformed = ctx => OnMove?.Invoke(ctx.ReadValue<Vector2>());
         moveCancled = ctx => OnMove?.Invoke(Vector2.zero);
 
         lookPerformed = ctx => OnLook?.Invoke(ctx.ReadValue<Vector2>());
         lookCancled = ctx => OnLook?.Invoke(Vector2.zero);
+
+        jumpStarted = ctx => OnJump?.Invoke();
 
         SubscribeActions();
     }
@@ -62,7 +69,14 @@ public class InputReader : ScriptableObject
     {
         _lookAction.Disable();
     }
-
+    public void EnableJumpAciton()
+    {
+        _jumpAction.Enable();
+    }
+    public void DisabelJumpAction()
+    {
+        _jumpAction.Disable();
+    }
 
 
     public void SubscribeActions()
@@ -72,6 +86,8 @@ public class InputReader : ScriptableObject
 
         _lookAction.performed += lookPerformed;
         _lookAction.canceled += lookCancled;
+
+        _jumpAction.performed += jumpStarted;
     }
 
     public void UnSubscrubeActions()
@@ -81,5 +97,7 @@ public class InputReader : ScriptableObject
 
         _lookAction.performed -= lookPerformed;
         _lookAction.canceled -= lookCancled;
+
+        _jumpAction.performed -= jumpStarted;
     }
 }
