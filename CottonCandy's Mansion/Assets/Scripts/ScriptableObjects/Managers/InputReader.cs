@@ -87,7 +87,8 @@ public class InputReader : ScriptableObject
         _lookAction.performed += lookPerformed;
         _lookAction.canceled += lookCancled;
 
-        _jumpAction.performed += jumpStarted;
+        _jumpAction.started += jumpStarted;
+
     }
 
     public void UnSubscrubeActions()
@@ -98,6 +99,7 @@ public class InputReader : ScriptableObject
         _lookAction.performed -= lookPerformed;
         _lookAction.canceled -= lookCancled;
 
-        _jumpAction.performed -= jumpStarted;
+        _jumpAction.started -= jumpStarted;
+
     }
 }

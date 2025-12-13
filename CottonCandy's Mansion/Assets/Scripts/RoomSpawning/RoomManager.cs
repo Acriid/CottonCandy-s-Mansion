@@ -97,7 +97,7 @@ public class RoomManager : MonoBehaviour
                 roomList = new(GetRoomList(RoomSO.RoomType.Hallway));
                 currentRoom = SpawnRoom(randomRoom,roomPosition,roomRotation);
 
-                SpawnBox(randomRoom.RoomSize,roomPosition,roomRotation);
+                //SpawnBox(randomRoom.RoomSize,roomPosition,roomRotation);
                 _level.Add(currentRoom);
             }
 

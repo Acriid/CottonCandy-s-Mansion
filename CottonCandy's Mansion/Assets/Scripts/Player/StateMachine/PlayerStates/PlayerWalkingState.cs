@@ -11,6 +11,7 @@ public class PlayerWalkingState : PlayerState
         base.EnterState();
         Player.EnableMovement();
         Player.EnableJump();
+    
     }
     public override void ExitState()
     {
@@ -25,6 +26,11 @@ public class PlayerWalkingState : PlayerState
     public override void PhysicsUpdate()
     {
         base.PhysicsUpdate();
+
+        if (Player.CanJump())
+        {
+            Player.ExecuteJump();
+        }
         Player.MovePlayer(Player.GetMoveInput());
     }
     public override void AnimationTriggerEvent()

@@ -9,37 +9,59 @@ public class Player : MonoBehaviour
 {
     //REMOVELATER
     public TMP_Text textthing;
+    #region Input
     [Header("Input")]
     [SerializeField] private InputReader _inputReader;
     [SerializeField] private Rigidbody _rigidBody;
+    #endregion
+    #region Movement
     [Header("Movement")]
     [SerializeField] private float _playerSpeed;
     [SerializeField] private float _groundDrag;
-    [SerializeField] private float _jumpForce;
     [SerializeField] private Transform _groundCheckPoint;
     [SerializeField] private float _groundCheckRadius;
     [SerializeField] private LayerMask _groundLayerMask;
+    #region Jump
+    [Header("Jump")]
+    [SerializeField] private float _jumpForce;
+    private float _coyoteTimer = 0f;
+    private float _jumpBufferTimer = 0f;
+    [SerializeField] private float _coyoteTime = 0.1f;
+    [SerializeField] private float _jumpBufferTime = 0.15f;
+    private bool _wasGroundedLastFrame = false;
+    #endregion
+    #endregion
+
+
+
+
+    #region Camera
     [Header("Camera")]
     [SerializeField] private Transform _orientation;
     [SerializeField] private float _lookSensitivity;
+    [SerializeField] private float _maxLookRange;
+    [SerializeField] private Transform _cameraTransform;
+    #endregion
+
+
+
 
     private Vector2 _moveInput;
-    public Vector3 _gravityDirection;
-    public float _gravityModifier;
-    private Vector3 gravityVelocity = Vector3.zero;
-    public float RotationSpeed;
+    private Vector3 _gravityDirection;
+    [Header("Gravity")]
+    [SerializeField] private float _gravityModifier;
+    [SerializeField] private float RotationSpeed;
     private Coroutine _rotateCoroutine;
 
     private float _xRotation = 0f;
     private float _yRotation = 0f;
-    [SerializeField] private float _maxLookRange;
-    [SerializeField] private Transform _cameraTransform;
 
 
     public PlayerStateMachine StateMachine {get; set;}
     public PlayerWalkingState WalkingState {get; set;}
 
     private GameObject _lastObjectHit;
+
     const float PLAYERSPEEDOFFSET = 10f;
     const float PLAYERGRAVITYOFFSET = 5f;
 
@@ -58,6 +80,7 @@ public class Player : MonoBehaviour
         SubscirbeToEvents();
 
         _rigidBody.freezeRotation = true;
+
     }
 
     void Start()
@@ -79,6 +102,20 @@ public class Player : MonoBehaviour
     }
     void FixedUpdate()
     {
+        bool isGrounded = CheckIfGrounded();
+        if (isGrounded)
+        {
+            _coyoteTimer = _coyoteTime;
+        }
+        else
+        {
+            _coyoteTimer -= Time.fixedDeltaTime;
+        }
+
+        _wasGroundedLastFrame = isGrounded;
+        
+        _jumpBufferTimer -= Time.fixedDeltaTime;
+
         StateMachine.CurrentState.PhysicsUpdate();
     }
 
@@ -94,11 +131,11 @@ public class Player : MonoBehaviour
         }
         else
         {
-            Vector3 gravityComp = Vector3.Project(_rigidBody.linearVelocity, _gravityDirection);
-            if (Vector3.Dot(gravityComp, _gravityDirection) < 0f)
-            {
-                _rigidBody.linearVelocity -= gravityComp;
-            }
+            // Vector3 gravityComp = Vector3.Project(_rigidBody.linearVelocity, _gravityDirection);
+            // if (Vector3.Dot(gravityComp, _gravityDirection) < 0f)
+            // {
+            //     _rigidBody.linearVelocity -= gravityComp;
+            // }
         }
 
         _rigidBody.linearDamping = CheckIfGrounded() ? _groundDrag : 0f;
@@ -201,13 +238,22 @@ public class Player : MonoBehaviour
     }
 
 
-
     private void OnJump()
+    {
+        _jumpBufferTimer = _jumpBufferTime;
+    }
+    public bool CanJump()
+    {
+        return _jumpBufferTimer > 0f && _coyoteTimer > 0f;
+    }
+    public void ExecuteJump()
     {
         Vector3 gravityComp = Vector3.Project(_rigidBody.linearVelocity, _gravityDirection);
         _rigidBody.linearVelocity -= gravityComp;
-
         _rigidBody.AddForce(transform.up * _jumpForce,ForceMode.Impulse);
+
+        _jumpBufferTimer = 0f;
+        _coyoteTimer = 0f;
     }
 
 
