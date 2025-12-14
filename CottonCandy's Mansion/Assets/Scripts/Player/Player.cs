@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using TMPro;
+using Unity.Cinemachine;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -41,6 +42,8 @@ public class Player : MonoBehaviour
     [SerializeField] private float _lookSensitivity;
     [SerializeField] private float _maxLookRange;
     [SerializeField] private Transform _cameraTransform;
+    [SerializeField] private Camera _mainCamera;
+    [SerializeField] private CinemachineBrain _cinemachineBrain;
     #endregion
 
 
@@ -121,21 +124,25 @@ public class Player : MonoBehaviour
 
     public void MovePlayer(Vector2 direction)
     {
+        // Get camera directions
+        Vector3 cameraForward = _mainCamera.transform.forward;
+        Vector3 cameraRight = _mainCamera.transform.right;
         
-        Vector3 moveDirection = _orientation.forward * direction.y + _orientation.right * direction.x;
+        // Project onto player's movement plane (perpendicular to gravity)
+        Vector3 playerUp = -_gravityDirection.normalized;
+        Vector3 projectedForward = Vector3.ProjectOnPlane(cameraForward, playerUp);
+        Vector3 projectedRight = Vector3.ProjectOnPlane(cameraRight, playerUp);
+        
+        // Normalize only if they have magnitude (avoid zero vector)
+        if (projectedForward.sqrMagnitude > 0.01f) projectedForward.Normalize();
+        if (projectedRight.sqrMagnitude > 0.01f) projectedRight.Normalize();
+        
+        Vector3 moveDirection = projectedForward * direction.y + projectedRight * direction.x;
         _rigidBody.AddForce(_playerSpeed * PLAYERSPEEDOFFSET * moveDirection.normalized, ForceMode.Force);
 
         if (!CheckIfGrounded())
         {
             _rigidBody.linearVelocity += _gravityModifier * PLAYERGRAVITYOFFSET * Time.fixedDeltaTime * _gravityDirection.normalized;
-        }
-        else
-        {
-            // Vector3 gravityComp = Vector3.Project(_rigidBody.linearVelocity, _gravityDirection);
-            // if (Vector3.Dot(gravityComp, _gravityDirection) < 0f)
-            // {
-            //     _rigidBody.linearVelocity -= gravityComp;
-            // }
         }
 
         _rigidBody.linearDamping = CheckIfGrounded() ? _groundDrag : 0f;
@@ -171,6 +178,10 @@ public class Player : MonoBehaviour
 
         _xRotation = Mathf.Clamp(_xRotation,-_maxLookRange,_maxLookRange);
     }
+    private void RotatePlayer()
+    {
+        
+    }
     private void RotateCamera()
     {
         // Apply body yaw only if there was mouse movement this frame
@@ -194,6 +205,7 @@ public class Player : MonoBehaviour
 
     public void ChangeGravityDirection(Vector3 newDirection)
     {
+
         Quaternion targetRotation = Quaternion.FromToRotation(transform.up, newDirection) * transform.rotation;
 
         if (_rotateCoroutine != null)
@@ -276,7 +288,7 @@ public class Player : MonoBehaviour
         _inputReader.EnableMoveAction();
     }
     #endregion
-
+    //
     public void EnableJump()
     {
         _inputReader.EnableJumpAciton();
