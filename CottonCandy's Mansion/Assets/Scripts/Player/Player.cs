@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using TMPro;
 using Unity.Cinemachine;
+using Unity.VisualScripting;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -22,6 +23,7 @@ public class Player : MonoBehaviour
     [SerializeField] private Transform _groundCheckPoint;
     [SerializeField] private float _groundCheckRadius;
     [SerializeField] private LayerMask _groundLayerMask;
+
     #region Jump
     [Header("Jump")]
     [SerializeField] private float _jumpForce;
@@ -38,12 +40,14 @@ public class Player : MonoBehaviour
 
     #region Camera
     [Header("Camera")]
+    [SerializeField] private Transform _cameraTarget;
     [SerializeField] private Transform _orientation;
     [SerializeField] private float _lookSensitivity;
     [SerializeField] private float _maxLookRange;
     [SerializeField] private Transform _cameraTransform;
     [SerializeField] private Camera _mainCamera;
-    [SerializeField] private CinemachineBrain _cinemachineBrain;
+    [SerializeField] private float _rotationSpeed;
+    
     #endregion
 
 
@@ -54,6 +58,7 @@ public class Player : MonoBehaviour
     [Header("Gravity")]
     [SerializeField] private float _gravityModifier;
     [SerializeField] private float RotationSpeed;
+      
     private Coroutine _rotateCoroutine;
 
     private float _xRotation = 0f;
@@ -67,6 +72,10 @@ public class Player : MonoBehaviour
 
     const float PLAYERSPEEDOFFSET = 10f;
     const float PLAYERGRAVITYOFFSET = 5f;
+
+
+
+  
 
     void Awake()
     {
@@ -101,7 +110,7 @@ public class Player : MonoBehaviour
     void Update()
     {
         StateMachine.CurrentState.FrameUpdate();
-        RotateCamera();
+        //RotateCamera();
     }
     void FixedUpdate()
     {
@@ -121,9 +130,13 @@ public class Player : MonoBehaviour
 
         StateMachine.CurrentState.PhysicsUpdate();
     }
-
+    void LateUpdate()
+    {
+        _cameraTarget.transform.position = transform.position;
+    }
     public void MovePlayer(Vector2 direction)
     {
+
         // Get camera directions
         Vector3 cameraForward = _mainCamera.transform.forward;
         Vector3 cameraRight = _mainCamera.transform.right;
@@ -133,12 +146,17 @@ public class Player : MonoBehaviour
         Vector3 projectedForward = Vector3.ProjectOnPlane(cameraForward, playerUp);
         Vector3 projectedRight = Vector3.ProjectOnPlane(cameraRight, playerUp);
         
-        // Normalize only if they have magnitude (avoid zero vector)
         if (projectedForward.sqrMagnitude > 0.01f) projectedForward.Normalize();
         if (projectedRight.sqrMagnitude > 0.01f) projectedRight.Normalize();
         
         Vector3 moveDirection = projectedForward * direction.y + projectedRight * direction.x;
         _rigidBody.AddForce(_playerSpeed * PLAYERSPEEDOFFSET * moveDirection.normalized, ForceMode.Force);
+        Vector3 horizontalVelocity = Vector3.ProjectOnPlane(_rigidBody.linearVelocity, playerUp);
+        if (horizontalVelocity.sqrMagnitude > 0.1f)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(horizontalVelocity, playerUp);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, _rotationSpeed * Time.fixedDeltaTime);
+        }
 
         if (!CheckIfGrounded())
         {
@@ -147,7 +165,8 @@ public class Player : MonoBehaviour
 
         _rigidBody.linearDamping = CheckIfGrounded() ? _groundDrag : 0f;
         SpeedControl();
-        textthing.text = _rigidBody.linearVelocity.magnitude.ToString();
+
+        
     }
     private void SpeedControl()
     {
@@ -178,9 +197,12 @@ public class Player : MonoBehaviour
 
         _xRotation = Mathf.Clamp(_xRotation,-_maxLookRange,_maxLookRange);
     }
-    private void RotatePlayer()
+    private void RotatePlayer(Vector3 direction)
     {
-        
+        if(direction != Vector3.zero)
+        {
+            transform.forward = Vector3.Lerp(transform.forward,direction.normalized,Time.fixedDeltaTime*_rotationSpeed);
+        }
     }
     private void RotateCamera()
     {
@@ -207,7 +229,7 @@ public class Player : MonoBehaviour
     {
 
         Quaternion targetRotation = Quaternion.FromToRotation(transform.up, newDirection) * transform.rotation;
-
+        
         if (_rotateCoroutine != null)
             StopCoroutine(_rotateCoroutine);
 
@@ -226,8 +248,10 @@ public class Player : MonoBehaviour
 
         // Snap exactly and update gravity direction
         transform.rotation = targetRotation;
+        _cameraTarget.transform.up = transform.up;
         _gravityDirection = -transform.up;
         _rotateCoroutine = null;
+
     }
 
     void OnCollisionEnter(Collision collision)
