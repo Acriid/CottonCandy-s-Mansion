@@ -16,6 +16,9 @@ public class Player : MonoBehaviour
     [SerializeField] private InputReader _inputReader;
     [SerializeField] private Rigidbody _rigidBody;
     #endregion
+
+
+
     #region Movement
     [Header("Movement")]
     [SerializeField] private float _playerSpeed;
@@ -23,6 +26,9 @@ public class Player : MonoBehaviour
     [SerializeField] private Transform _groundCheckPoint;
     [SerializeField] private float _groundCheckRadius;
     [SerializeField] private LayerMask _groundLayerMask;
+
+    [SerializeField] private float _maxSlopeAngle;
+    
 
     #region Jump
     [Header("Jump")]
@@ -52,17 +58,19 @@ public class Player : MonoBehaviour
 
 
 
-
     private Vector2 _moveInput;
     private Vector3 _gravityDirection;
     [Header("Gravity")]
     [SerializeField] private float _gravityModifier;
     [SerializeField] private float RotationSpeed;
-      
     private Coroutine _rotateCoroutine;
+
+
+
 
     private float _xRotation = 0f;
     private float _yRotation = 0f;
+
 
 
     public PlayerStateMachine StateMachine {get; set;}
@@ -151,12 +159,10 @@ public class Player : MonoBehaviour
         
         Vector3 moveDirection = projectedForward * direction.y + projectedRight * direction.x;
         _rigidBody.AddForce(_playerSpeed * PLAYERSPEEDOFFSET * moveDirection.normalized, ForceMode.Force);
-        Vector3 horizontalVelocity = Vector3.ProjectOnPlane(_rigidBody.linearVelocity, playerUp);
-        if (horizontalVelocity.sqrMagnitude > 0.1f)
-        {
-            Quaternion targetRotation = Quaternion.LookRotation(horizontalVelocity, playerUp);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, _rotationSpeed * Time.fixedDeltaTime);
-        }
+
+        //ThirdPerson Rotation
+        RotatePlayer(playerUp);
+
 
         if (!CheckIfGrounded())
         {
@@ -197,11 +203,13 @@ public class Player : MonoBehaviour
 
         _xRotation = Mathf.Clamp(_xRotation,-_maxLookRange,_maxLookRange);
     }
-    private void RotatePlayer(Vector3 direction)
+    private void RotatePlayer(Vector3 playerUp)
     {
-        if(direction != Vector3.zero)
+        Vector3 horizontalVelocity = Vector3.ProjectOnPlane(_rigidBody.linearVelocity, playerUp);
+        if (horizontalVelocity.sqrMagnitude > 0.1f)
         {
-            transform.forward = Vector3.Lerp(transform.forward,direction.normalized,Time.fixedDeltaTime*_rotationSpeed);
+            Quaternion targetRotation = Quaternion.LookRotation(horizontalVelocity, playerUp);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, _rotationSpeed * Time.fixedDeltaTime);
         }
     }
     private void RotateCamera()
@@ -227,7 +235,7 @@ public class Player : MonoBehaviour
 
     public void ChangeGravityDirection(Vector3 newDirection)
     {
-
+        DisableMovement();
         Quaternion targetRotation = Quaternion.FromToRotation(transform.up, newDirection) * transform.rotation;
         
         if (_rotateCoroutine != null)
@@ -251,6 +259,7 @@ public class Player : MonoBehaviour
         _cameraTarget.transform.up = transform.up;
         _gravityDirection = -transform.up;
         _rotateCoroutine = null;
+        EnableMovement();
 
     }
 
@@ -265,7 +274,7 @@ public class Player : MonoBehaviour
         }
         
     }
-
+//
     private bool CheckIfGrounded()
     {
         Vector3 groundPoint = _groundCheckPoint.transform.position;
