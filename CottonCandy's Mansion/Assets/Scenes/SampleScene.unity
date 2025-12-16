@@ -11660,13 +11660,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1472124877}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.3419969, y: 0.6189008, z: -0.3419969, w: 0.6189008}
-  m_LocalPosition: {x: -13.62, y: 8.33, z: 0}
+  m_LocalRotation: {x: 0.27059805, y: 0.6532815, z: -0.27059805, w: 0.6532815}
+  m_LocalPosition: {x: -10.26, y: 5.83, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 57.849, y: 90, z: 0}
+  m_LocalEulerAnglesHint: {x: 45, y: 90, z: 0}
 --- !u!1 &1657221423
 GameObject:
   m_ObjectHideFlags: 0
@@ -11905,6 +11905,7 @@ GameObject:
   - component: {fileID: 1678876881}
   - component: {fileID: 1678876880}
   - component: {fileID: 1678876879}
+  - component: {fileID: 1678876882}
   - component: {fileID: 1678876878}
   - component: {fileID: 1678876877}
   - component: {fileID: 1678876876}
@@ -11978,6 +11979,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player
   textthing: {fileID: 1657221425}
+  SlopeDetection: {fileID: 1678876882}
   _inputReader: {fileID: 11400000, guid: 0d64cf989fab4bd439639a435393ae65, type: 2}
   _rigidBody: {fileID: 1678876876}
   _playerSpeed: 12.5
@@ -12076,6 +12078,27 @@ Transform:
   - {fileID: 1675195954}
   m_Father: {fileID: 1765513222}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1678876882
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1678876875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fcbbeaf247880e4e9b91c87d2820ec5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SlopeDetection
+  _maxSlopeAngle: 45
+  _minDotProduct: 0.7
+  _checkDistance: 0.3
+  _groundCheckRadius: 0.2
+  _groundLayerMasks:
+    serializedVersion: 2
+    m_Bits: 8
+  _rigidBody: {fileID: 1678876876}
+  _capsule: {fileID: 1678876877}
 --- !u!1 &1691135658
 GameObject:
   m_ObjectHideFlags: 0
@@ -14345,6 +14368,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player
   textthing: {fileID: 1657221425}
+  SlopeDetection: {fileID: 0}
   _inputReader: {fileID: 11400000, guid: 0d64cf989fab4bd439639a435393ae65, type: 2}
   _rigidBody: {fileID: 6600059034148427194}
   _playerSpeed: 12.5
@@ -14561,6 +14585,7 @@ GameObject:
   - component: {fileID: 2920018506325256588}
   - component: {fileID: 9000249865771527344}
   - component: {fileID: 6600059034148427194}
+  - component: {fileID: 9000249865771527345}
   m_Layer: 0
   m_Name: TestPlayer
   m_TagString: Untagged
@@ -14615,6 +14640,27 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &9000249865771527345
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7602720049655480757}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fcbbeaf247880e4e9b91c87d2820ec5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SlopeDetection
+  _maxSlopeAngle: 45
+  _minDotProduct: 0.7
+  _checkDistance: 0.3
+  _groundCheckRadius: 0.25
+  _groundLayerMasks:
+    serializedVersion: 2
+    m_Bits: 0
+  _rigidBody: {fileID: 0}
+  _capsule: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

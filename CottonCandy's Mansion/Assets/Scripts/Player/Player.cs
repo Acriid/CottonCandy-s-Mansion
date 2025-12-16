@@ -7,17 +7,19 @@ using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(SlopeDetection))]
+[RequireComponent(typeof(Rigidbody))]
 public class Player : MonoBehaviour
 {
     //REMOVELATER
     public TMP_Text textthing;
     #region Input
     [Header("Input")]
+    [SerializeField] private SlopeDetection SlopeDetection;
     [SerializeField] private InputReader _inputReader;
     [SerializeField] private Rigidbody _rigidBody;
+    private Vector2 _moveInput;
     #endregion
-
-
 
     #region Movement
     [Header("Movement")]
@@ -41,9 +43,6 @@ public class Player : MonoBehaviour
     #endregion
     #endregion
 
-
-
-
     #region Camera
     [Header("Camera")]
     [SerializeField] private Transform _cameraTarget;
@@ -53,41 +52,40 @@ public class Player : MonoBehaviour
     [SerializeField] private Transform _cameraTransform;
     [SerializeField] private Camera _mainCamera;
     [SerializeField] private float _rotationSpeed;
+    private float _xRotation = 0f;
+    private float _yRotation = 0f;
     
     #endregion
 
-
-
-    private Vector2 _moveInput;
-    private Vector3 _gravityDirection;
+    #region Gravity
     [Header("Gravity")]
     [SerializeField] private float _gravityModifier;
     [SerializeField] private float RotationSpeed;
     private Coroutine _rotateCoroutine;
+    private Vector3 _gravityDirection;
+    #endregion
 
-
-
-
-    private float _xRotation = 0f;
-    private float _yRotation = 0f;
-
-
-
+    #region StateMachine
     public PlayerStateMachine StateMachine {get; set;}
     public PlayerWalkingState WalkingState {get; set;}
+    #endregion
 
+    #region Collision
     private GameObject _lastObjectHit;
+    #endregion
 
+    #region Constants
     const float PLAYERSPEEDOFFSET = 10f;
     const float PLAYERGRAVITYOFFSET = 5f;
-
+    #endregion
 
 
   
-
+    #region StartFunctions
     void Awake()
     {
         if(_inputReader == null){Debug.LogError("InputReader does not exists"); return;}
+        if(_rigidBody == null){_rigidBody = GetComponent<Rigidbody>();}
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -107,6 +105,9 @@ public class Player : MonoBehaviour
     {
         StateMachine.Initialize(WalkingState);
     }
+    #endregion
+
+    #region Disabled functions
     void OnDestroy()
     {
         OnDisable();
@@ -115,6 +116,9 @@ public class Player : MonoBehaviour
     {
         UnSubscribeFromEvents();
     }
+    #endregion
+
+    #region UpdateFunctions
     void Update()
     {
         StateMachine.CurrentState.FrameUpdate();
@@ -142,6 +146,9 @@ public class Player : MonoBehaviour
     {
         _cameraTarget.transform.position = transform.position;
     }
+    #endregion
+
+    #region Movement Functions
     public void MovePlayer(Vector2 direction)
     {
 
@@ -158,13 +165,19 @@ public class Player : MonoBehaviour
         if (projectedRight.sqrMagnitude > 0.01f) projectedRight.Normalize();
         
         Vector3 moveDirection = projectedForward * direction.y + projectedRight * direction.x;
+
+
+        if(SlopeDetection.IsOnWalkableSlope())
+        {
+            moveDirection = SlopeDetection.GetSlopeMoveDirection(moveDirection);
+        }
         _rigidBody.AddForce(_playerSpeed * PLAYERSPEEDOFFSET * moveDirection.normalized, ForceMode.Force);
 
         //ThirdPerson Rotation
         RotatePlayer(playerUp);
 
 
-        if (!CheckIfGrounded())
+        if (!CheckIfGrounded() && !SlopeDetection.IsOnWalkableSlope())
         {
             _rigidBody.linearVelocity += _gravityModifier * PLAYERGRAVITYOFFSET * Time.fixedDeltaTime * _gravityDirection.normalized;
         }
@@ -190,9 +203,9 @@ public class Player : MonoBehaviour
         }
     }
 
+    #endregion
 
-
-    #region  First Person Camera
+    #region First Person Camera
     private void CameraMovement(Vector2 direction)
     {
         float lookX = direction.x * _lookSensitivity * Time.deltaTime * 0.25f;
@@ -203,15 +216,7 @@ public class Player : MonoBehaviour
 
         _xRotation = Mathf.Clamp(_xRotation,-_maxLookRange,_maxLookRange);
     }
-    private void RotatePlayer(Vector3 playerUp)
-    {
-        Vector3 horizontalVelocity = Vector3.ProjectOnPlane(_rigidBody.linearVelocity, playerUp);
-        if (horizontalVelocity.sqrMagnitude > 0.1f)
-        {
-            Quaternion targetRotation = Quaternion.LookRotation(horizontalVelocity, playerUp);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, _rotationSpeed * Time.fixedDeltaTime);
-        }
-    }
+
     private void RotateCamera()
     {
         // Apply body yaw only if there was mouse movement this frame
@@ -232,7 +237,19 @@ public class Player : MonoBehaviour
     }
     #endregion
 
+    #region Third Person Rotation
+    private void RotatePlayer(Vector3 playerUp)
+    {
+        Vector3 horizontalVelocity = Vector3.ProjectOnPlane(_rigidBody.linearVelocity, playerUp);
+        if (horizontalVelocity.sqrMagnitude > 0.1f)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(horizontalVelocity, playerUp);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, _rotationSpeed * Time.fixedDeltaTime);
+        }
+    }
+    #endregion
 
+    #region Gravity Functions
     public void ChangeGravityDirection(Vector3 newDirection)
     {
         DisableMovement();
@@ -262,7 +279,9 @@ public class Player : MonoBehaviour
         EnableMovement();
 
     }
+    #endregion
 
+    #region CollisionChecks
     void OnCollisionEnter(Collision collision)
     {
         if(!collision.gameObject.CompareTag("CollisionAble")) {return;}
@@ -274,15 +293,16 @@ public class Player : MonoBehaviour
         }
         
     }
-//
+
     private bool CheckIfGrounded()
     {
         Vector3 groundPoint = _groundCheckPoint.transform.position;
         bool isGrounded = Physics.CheckSphere(groundPoint, _groundCheckRadius, _groundLayerMask);
         return isGrounded;
     }
+    #endregion
 
-
+    #region Jump Functions
     private void OnJump()
     {
         _jumpBufferTimer = _jumpBufferTime;
@@ -300,8 +320,7 @@ public class Player : MonoBehaviour
         _jumpBufferTimer = 0f;
         _coyoteTimer = 0f;
     }
-
-
+    #endregion
 
     #region  MoveInput
     public Vector2 GetMoveInput()
@@ -321,7 +340,8 @@ public class Player : MonoBehaviour
         _inputReader.EnableMoveAction();
     }
     #endregion
-    //
+
+    #region JumpInput
     public void EnableJump()
     {
         _inputReader.EnableJumpAciton();
@@ -330,7 +350,9 @@ public class Player : MonoBehaviour
     {
         _inputReader.DisabelJumpAction();
     }
+    #endregion
 
+    #region Subcriptions
     private void SubscirbeToEvents()
     {
         _inputReader.OnMove += UpdateMoveInput;
@@ -343,4 +365,5 @@ public class Player : MonoBehaviour
         _inputReader.OnLook -= CameraMovement;
         _inputReader.OnJump -= OnJump;
     }
+    #endregion
 }
