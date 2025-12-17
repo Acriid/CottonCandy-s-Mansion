@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 [CreateAssetMenu(fileName = "CottonCandy", menuName = "ScriptableObjects/CottonCandySO")]
 public class CottonCandySO : ScriptableObject
@@ -14,5 +17,48 @@ public class CottonCandySO : ScriptableObject
     //List of current upsides
     //List of current downsides
 
-    [SerializeField] private List<OfferSO> _allDeals;
+    [SerializeField] private List<ConditionSO> _allConditions;
+    [SerializeField] private Dictionary<ConditionSO.ConditionType,List<ConditionSO>> _conditionDictionary = new();
+
+
+    const string LOADLABLE = "Offers";
+
+    async void OnEnable()
+    {
+        await LoadConditions();
+    }
+    private async Task LoadConditions()
+    {
+        AsyncOperationHandle<IList<ConditionSO>> _handle = Addressables.LoadAssetsAsync<ConditionSO>(LOADLABLE, null);
+
+        await _handle.Task;
+
+        if (_handle.Status == AsyncOperationStatus.Succeeded)
+        {
+            _allConditions.AddRange(_handle.Result);
+        }
+        else
+        {
+            Debug.LogError("Failed to load rooms.");
+        }
+
+        Addressables.Release(_handle);
+
+        foreach(ConditionSO.ConditionType offerType in Enum.GetValues(typeof(ConditionSO.ConditionType)))
+        {
+            _conditionDictionary.Add(offerType,new());
+        }
+
+        foreach (ConditionSO offerSO in _allConditions)
+        {
+            _conditionDictionary[offerSO.Type].Add(offerSO);
+        }
+
+        foreach(ConditionSO.ConditionType offerType in Enum.GetValues(typeof(ConditionSO.ConditionType)))
+        {
+            _conditionDictionary[offerType].Sort(new ConditionWeightComparison());
+        }
+
+
+    }
 }
