@@ -8,14 +8,18 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(SlopeDetection))]
+[RequireComponent(typeof(PickUpMechanic))]
 [RequireComponent(typeof(Rigidbody))]
 public class Player : MonoBehaviour
 {
     //REMOVELATER
     public TMP_Text textthing;
+    #region Other Scripts
+    [SerializeField] private SlopeDetection SlopeDetection;
+    [SerializeField] private PickUpMechanic PickUpMechanic;
+    #endregion
     #region Input
     [Header("Input")]
-    [SerializeField] private SlopeDetection SlopeDetection;
     [SerializeField] private InputReader _inputReader;
     [SerializeField] private Rigidbody _rigidBody;
     private Vector2 _moveInput;
@@ -86,6 +90,8 @@ public class Player : MonoBehaviour
     {
         if(_inputReader == null){Debug.LogError("InputReader does not exists"); return;}
         if(_rigidBody == null){_rigidBody = GetComponent<Rigidbody>();}
+        if(SlopeDetection == null){SlopeDetection = GetComponent<SlopeDetection>();}
+        if(PickUpMechanic == null){PickUpMechanic = GetComponent<PickUpMechanic>();}
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;

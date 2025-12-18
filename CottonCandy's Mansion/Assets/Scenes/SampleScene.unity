@@ -11907,8 +11907,10 @@ GameObject:
   - component: {fileID: 1678876879}
   - component: {fileID: 1678876882}
   - component: {fileID: 1678876878}
+  - component: {fileID: 1678876883}
   - component: {fileID: 1678876877}
   - component: {fileID: 1678876876}
+  - component: {fileID: 1678876884}
   m_Layer: 0
   m_Name: TestPlayer (1)
   m_TagString: Player
@@ -11980,6 +11982,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Player
   textthing: {fileID: 1657221425}
   SlopeDetection: {fileID: 1678876882}
+  PickUpMechanic: {fileID: 0}
   _inputReader: {fileID: 11400000, guid: 0d64cf989fab4bd439639a435393ae65, type: 2}
   _rigidBody: {fileID: 1678876876}
   _playerSpeed: 12.5
@@ -12099,6 +12102,43 @@ MonoBehaviour:
     m_Bits: 8
   _rigidBody: {fileID: 1678876876}
   _capsule: {fileID: 1678876877}
+--- !u!114 &1678876883
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1678876875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9124607fbb3b3c24599e319565f50da9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PickUpMechanic
+  _detectionRadius: 3
+  _itemLayer:
+    serializedVersion: 2
+    m_Bits: 0
+--- !u!135 &1678876884
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1678876875}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 3
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1691135658
 GameObject:
   m_ObjectHideFlags: 0
@@ -14369,6 +14409,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Player
   textthing: {fileID: 1657221425}
   SlopeDetection: {fileID: 0}
+  PickUpMechanic: {fileID: 0}
   _inputReader: {fileID: 11400000, guid: 0d64cf989fab4bd439639a435393ae65, type: 2}
   _rigidBody: {fileID: 6600059034148427194}
   _playerSpeed: 12.5
@@ -14586,6 +14627,7 @@ GameObject:
   - component: {fileID: 9000249865771527344}
   - component: {fileID: 6600059034148427194}
   - component: {fileID: 9000249865771527345}
+  - component: {fileID: 9000249865771527346}
   m_Layer: 0
   m_Name: TestPlayer
   m_TagString: Untagged
@@ -14661,6 +14703,22 @@ MonoBehaviour:
     m_Bits: 0
   _rigidBody: {fileID: 0}
   _capsule: {fileID: 0}
+--- !u!114 &9000249865771527346
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7602720049655480757}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9124607fbb3b3c24599e319565f50da9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PickUpMechanic
+  _detectionRadius: 3
+  _itemLayer:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

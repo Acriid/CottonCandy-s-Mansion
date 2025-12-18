@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(SphereCollider))]
 public class PickUpMechanic : MonoBehaviour
 {
     [Header("Detection")]
@@ -12,7 +13,21 @@ public class PickUpMechanic : MonoBehaviour
     private Item _targetItem;
     private SphereCollider _detectionTrigger;
 
-    private void UpdateTargetItem(Transform player)
+    void Start()
+    {
+        Initialize();
+    }
+    void Update()
+    {
+        UpdateTargetItem(transform);
+    }
+    public void Initialize()
+    {
+        _detectionTrigger = GetComponent<SphereCollider>();
+        _detectionTrigger.radius = _detectionRadius;
+        _detectionTrigger.isTrigger = true;       
+    }
+    public void UpdateTargetItem(Transform player)
     {
         _itemsInRange.RemoveAll(item => item == null);
 
