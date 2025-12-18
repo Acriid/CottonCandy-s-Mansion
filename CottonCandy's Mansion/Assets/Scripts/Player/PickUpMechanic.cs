@@ -50,9 +50,10 @@ public class PickUpMechanic : MonoBehaviour
         
     }
 
-    public void PickUpItem()
+    public void PickUpItem(ref GameObject ItemToPickUp)
     {
-        _itemsInRange.Remove(_targetItem);
+        if(!ItemToPickUp.TryGetComponent<Item>(out var itemPickUp)) {return;}
+        _itemsInRange.Remove(itemPickUp);
         _targetItem = null;
         //TODO: in parent script
         // Add item to inventory
