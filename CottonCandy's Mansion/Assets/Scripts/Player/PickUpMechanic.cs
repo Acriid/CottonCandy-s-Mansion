@@ -50,10 +50,10 @@ public class PickUpMechanic : MonoBehaviour
         
     }
 
-    public void PickUpItem(ref GameObject ItemToPickUp)
+    public void PickUpItem()
     {
-        if(!ItemToPickUp.TryGetComponent<Item>(out var itemPickUp)) {return;}
-        _itemsInRange.Remove(itemPickUp);
+        
+        _itemsInRange.Remove(_targetItem);
         _targetItem = null;
         //TODO: in parent script
         // Add item to inventory
@@ -61,8 +61,13 @@ public class PickUpMechanic : MonoBehaviour
         // Show where character holds the item.
     }
 
+    public Item GetTargetItem()
+    {
+        return _targetItem;
+    }
     void OnTriggerEnter(Collider other)
     {
+        Debug.Log(other.name);
         if (((1 << other.gameObject.layer) & _itemLayer) == 0) 
             return;
 

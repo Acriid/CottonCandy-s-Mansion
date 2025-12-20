@@ -10,10 +10,12 @@ public class InputReader : ScriptableObject
     private InputAction _moveAction;
     private InputAction _lookAction;
     private InputAction _jumpAction;
+    private InputAction _interactAction;
 
     public event Action<Vector2> OnMove;
     public event Action<Vector2> OnLook;
     public event Action OnJump;
+    public event Action OnInteract;
 
     private Action<InputAction.CallbackContext> movePerformed;
     private Action<InputAction.CallbackContext> moveCancled; 
@@ -21,7 +23,11 @@ public class InputReader : ScriptableObject
     private Action<InputAction.CallbackContext> lookPerformed;
     private Action<InputAction.CallbackContext> lookCancled;
 
-    private Action<InputAction.CallbackContext> jumpStarted;
+    private Action<InputAction.CallbackContext> jumpPerformed;
+
+
+    private Action<InputAction.CallbackContext> interactPerformed;
+
 
     void OnEnable()
     {
@@ -30,6 +36,7 @@ public class InputReader : ScriptableObject
         _moveAction = _inputActions.Player.Move;
         _lookAction = _inputActions.Player.Look;
         _jumpAction = _inputActions.Player.Jump;
+        _interactAction = _inputActions.Player.Interact;
 
         movePerformed = ctx => OnMove?.Invoke(ctx.ReadValue<Vector2>());
         moveCancled = ctx => OnMove?.Invoke(Vector2.zero);
@@ -37,7 +44,9 @@ public class InputReader : ScriptableObject
         lookPerformed = ctx => OnLook?.Invoke(ctx.ReadValue<Vector2>());
         lookCancled = ctx => OnLook?.Invoke(Vector2.zero);
 
-        jumpStarted = ctx => OnJump?.Invoke();
+        jumpPerformed = ctx => OnJump?.Invoke();
+
+        interactPerformed = ctx => OnInteract?.Invoke();
 
         SubscribeActions();
     }
@@ -77,6 +86,14 @@ public class InputReader : ScriptableObject
     {
         _jumpAction.Disable();
     }
+    public void EnableInteractAction()
+    {
+        _interactAction.Enable();
+    }
+    public void DiasbleInteractAction()
+    {
+        _interactAction.Disable();
+    }
 
 
     public void SubscribeActions()
@@ -87,8 +104,9 @@ public class InputReader : ScriptableObject
         _lookAction.performed += lookPerformed;
         _lookAction.canceled += lookCancled;
 
-        _jumpAction.started += jumpStarted;
+        _jumpAction.started += jumpPerformed;
 
+        _interactAction.started += interactPerformed;
     }
 
     public void UnSubscrubeActions()
@@ -99,7 +117,9 @@ public class InputReader : ScriptableObject
         _lookAction.performed -= lookPerformed;
         _lookAction.canceled -= lookCancled;
 
-        _jumpAction.started -= jumpStarted;
+        _jumpAction.started -= jumpPerformed;
+
+        _interactAction.started -= interactPerformed;
 
     }
 }

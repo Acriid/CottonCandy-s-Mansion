@@ -17,7 +17,10 @@ public class Player : MonoBehaviour
     #region Other Scripts
     [SerializeField] private SlopeDetection SlopeDetection;
     [SerializeField] private PickUpMechanic PickUpMechanic;
+    [SerializeField] private InventoryMechanic InventoryMechanic;
     #endregion
+
+    [SerializeField] private GameObject _itemHolder;
     #region Input
     [Header("Input")]
     [SerializeField] private InputReader _inputReader;
@@ -286,7 +289,22 @@ public class Player : MonoBehaviour
 
     }
     #endregion
+    #region  Interaction
+    private void OnInteract()
+    {
+        Item pickUpItem = PickUpMechanic.GetTargetItem();
+        if(pickUpItem != null)
+        { 
+            Debug.Log(pickUpItem.gameObject.name);
+            PickUpMechanic.PickUpItem();
+            InventoryMechanic.AddToInventory(pickUpItem.gameObject);
 
+            
+            pickUpItem.gameObject.transform.SetParent(_itemHolder.transform,false);
+            pickUpItem.gameObject.transform.localPosition = Vector3.zero;
+        }
+    }
+    #endregion
     #region CollisionChecks
     void OnCollisionEnter(Collision collision)
     {
@@ -357,19 +375,30 @@ public class Player : MonoBehaviour
         _inputReader.DisabelJumpAction();
     }
     #endregion
-
+    #region  Interact
+    public void EnableInteract()
+    {
+        _inputReader.EnableInteractAction();
+    }
+    public void DisableInteract()
+    {
+        _inputReader.DiasbleInteractAction();
+    }
+    #endregion
     #region Subcriptions
     private void SubscirbeToEvents()
     {
         _inputReader.OnMove += UpdateMoveInput;
         _inputReader.OnLook += CameraMovement;
         _inputReader.OnJump += OnJump;
+        _inputReader.OnInteract += OnInteract;
     }
     private void UnSubscribeFromEvents()
     {
         _inputReader.OnMove -= UpdateMoveInput;
         _inputReader.OnLook -= CameraMovement;
         _inputReader.OnJump -= OnJump;
+        _inputReader.OnInteract -= OnInteract;
     }
     #endregion
 }

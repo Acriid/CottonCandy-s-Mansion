@@ -11,13 +11,14 @@ public class PlayerWalkingState : PlayerState
         base.EnterState();
         Player.EnableMovement();
         Player.EnableJump();
-    
+        Player.EnableInteract();
     }
     public override void ExitState()
     {
         base.ExitState();
         Player.DisableMovement();
         Player.DisableJump();
+        Player.DisableInteract();
     }
     public override void FrameUpdate()
     {
