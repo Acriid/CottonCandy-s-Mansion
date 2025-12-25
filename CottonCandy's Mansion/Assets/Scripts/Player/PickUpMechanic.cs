@@ -8,7 +8,6 @@ public class PickUpMechanic : MonoBehaviour
     [SerializeField] private float _detectionRadius = 3f;
     [SerializeField] private LayerMask _itemLayer;
 
-
     private List<Item> _itemsInRange = new();
     private Item _targetItem;
     private SphereCollider _detectionTrigger;
@@ -53,8 +52,11 @@ public class PickUpMechanic : MonoBehaviour
     public void PickUpItem()
     {
         
-        _itemsInRange.Remove(_targetItem);
-        _targetItem = null;
+        if(_itemsInRange.Remove(_targetItem))
+        {
+            _targetItem = null;
+        }
+        
         //TODO: in parent script
         // Add item to inventory
         // Show item in hotbar
