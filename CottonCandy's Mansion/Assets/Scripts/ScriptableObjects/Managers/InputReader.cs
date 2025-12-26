@@ -11,11 +11,13 @@ public class InputReader : ScriptableObject
     private InputAction _lookAction;
     private InputAction _jumpAction;
     private InputAction _interactAction;
+    private InputAction _dropAction;
 
     public event Action<Vector2> OnMove;
     public event Action<Vector2> OnLook;
     public event Action OnJump;
     public event Action OnInteract;
+    public event Action OnDrop;
 
     private Action<InputAction.CallbackContext> movePerformed;
     private Action<InputAction.CallbackContext> moveCancled; 
@@ -27,6 +29,7 @@ public class InputReader : ScriptableObject
 
 
     private Action<InputAction.CallbackContext> interactPerformed;
+    private Action<InputAction.CallbackContext> dropPerformed;
 
 
     void OnEnable()
@@ -37,6 +40,7 @@ public class InputReader : ScriptableObject
         _lookAction = _inputActions.Player.Look;
         _jumpAction = _inputActions.Player.Jump;
         _interactAction = _inputActions.Player.Interact;
+        _dropAction = _inputActions.Player.Drop;
 
         movePerformed = ctx => OnMove?.Invoke(ctx.ReadValue<Vector2>());
         moveCancled = ctx => OnMove?.Invoke(Vector2.zero);
@@ -47,6 +51,8 @@ public class InputReader : ScriptableObject
         jumpPerformed = ctx => OnJump?.Invoke();
 
         interactPerformed = ctx => OnInteract?.Invoke();
+
+        dropPerformed = ctx => OnDrop?.Invoke();
 
         SubscribeActions();
     }
@@ -70,6 +76,7 @@ public class InputReader : ScriptableObject
     {
         _moveAction.Disable();
     }
+
     public void EnableLookAction()
     {
         _lookAction.Enable();
@@ -78,6 +85,7 @@ public class InputReader : ScriptableObject
     {
         _lookAction.Disable();
     }
+
     public void EnableJumpAciton()
     {
         _jumpAction.Enable();
@@ -86,6 +94,7 @@ public class InputReader : ScriptableObject
     {
         _jumpAction.Disable();
     }
+
     public void EnableInteractAction()
     {
         _interactAction.Enable();
@@ -95,6 +104,14 @@ public class InputReader : ScriptableObject
         _interactAction.Disable();
     }
 
+    public void EnableDropAction()
+    {
+        _dropAction.Enable();
+    }
+    public void DisableDropAction()
+    {
+        _dropAction.Disable();
+    }
 
     public void SubscribeActions()
     {
@@ -107,6 +124,7 @@ public class InputReader : ScriptableObject
         _jumpAction.started += jumpPerformed;
 
         _interactAction.started += interactPerformed;
+        _dropAction.started += dropPerformed;
     }
 
     public void UnSubscrubeActions()
@@ -120,6 +138,7 @@ public class InputReader : ScriptableObject
         _jumpAction.started -= jumpPerformed;
 
         _interactAction.started -= interactPerformed;
+        _dropAction.started -= dropPerformed;
 
     }
 }

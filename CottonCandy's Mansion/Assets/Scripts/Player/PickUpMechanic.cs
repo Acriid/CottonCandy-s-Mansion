@@ -49,10 +49,11 @@ public class PickUpMechanic : MonoBehaviour
         
     }
 
-    public void PickUpItem()
+    public void PickUpItem(Transform itemHolder, bool keepGlobal, Item itemToPickUp)
     {
-        
-        if(_itemsInRange.Remove(_targetItem))
+        itemToPickUp.transform.SetParent(itemHolder,keepGlobal);
+        itemToPickUp.transform.localPosition = Vector3.zero;
+        if(_itemsInRange.Remove(itemToPickUp) && itemToPickUp == _targetItem)
         {
             _targetItem = null;
         }

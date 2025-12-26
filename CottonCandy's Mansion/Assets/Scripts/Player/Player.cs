@@ -293,16 +293,19 @@ public class Player : MonoBehaviour
     private void OnInteract()
     {
         Item pickUpItem = PickUpMechanic.GetTargetItem();
+
         if(pickUpItem != null)
         { 
             Debug.Log(pickUpItem.gameObject.name);
-            PickUpMechanic.PickUpItem();
+            pickUpItem.UseGravity(false);
+            PickUpMechanic.PickUpItem(_itemHolder.transform,false,pickUpItem);
             InventoryMechanic.AddToInventory(pickUpItem.gameObject);
-
-            
-            pickUpItem.gameObject.transform.SetParent(_itemHolder.transform,false);
-            pickUpItem.gameObject.transform.localPosition = Vector3.zero;
         }
+    }
+
+    private void OnDrop()
+    {
+        
     }
     #endregion
     #region CollisionChecks
@@ -385,6 +388,16 @@ public class Player : MonoBehaviour
         _inputReader.DiasbleInteractAction();
     }
     #endregion
+    #region  Drop
+    public void EnableDrop()
+    {
+        _inputReader.EnableDropAction();
+    }
+    public void DisableDrop()
+    {
+        _inputReader.DisableDropAction();
+    }
+    #endregion
     #region Subcriptions
     private void SubscirbeToEvents()
     {
@@ -392,6 +405,7 @@ public class Player : MonoBehaviour
         _inputReader.OnLook += CameraMovement;
         _inputReader.OnJump += OnJump;
         _inputReader.OnInteract += OnInteract;
+        _inputReader.OnDrop += OnDrop;
     }
     private void UnSubscribeFromEvents()
     {
@@ -399,6 +413,7 @@ public class Player : MonoBehaviour
         _inputReader.OnLook -= CameraMovement;
         _inputReader.OnJump -= OnJump;
         _inputReader.OnInteract -= OnInteract;
+        _inputReader.OnDrop -= OnDrop;
     }
     #endregion
 }
