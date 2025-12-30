@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 [RequireComponent(typeof(SphereCollider))]
 public class PickUpMechanic : MonoBehaviour
@@ -16,10 +17,12 @@ public class PickUpMechanic : MonoBehaviour
     {
         Initialize();
     }
+
     void Update()
     {
         UpdateTargetItem(transform);
     }
+
     public void Initialize()
     {
         _detectionTrigger = GetComponent<SphereCollider>();
@@ -51,23 +54,33 @@ public class PickUpMechanic : MonoBehaviour
 
     public void PickUpItem(Transform itemHolder, bool keepGlobal, Item itemToPickUp)
     {
+
         itemToPickUp.transform.SetParent(itemHolder,keepGlobal);
-        itemToPickUp.transform.localPosition = Vector3.zero;
-        if(_itemsInRange.Remove(itemToPickUp) && itemToPickUp == _targetItem)
+        itemToPickUp.transform.SetLocalPositionAndRotation(Vector3.zero, new(0f,0f,0f,0f));
+        itemToPickUp.KinematicRigidBody(true);
+
+        if (_itemsInRange.Remove(itemToPickUp) && itemToPickUp == _targetItem)
         {
             _targetItem = null;
         }
         
-        //TODO: in parent script
-        // Add item to inventory
-        // Show item in hotbar
-        // Show where character holds the item.
     }
+
+    public void DropItem(Transform itemHolder, bool keepGravity, Item itemToPutDown)
+    {
+        itemToPutDown.transform.SetParent(itemHolder,true);
+        itemToPutDown.UseGravity(keepGravity);
+        itemToPutDown.KinematicRigidBody(false);
+        _itemsInRange.Add(itemToPutDown);
+    }
+
+    
 
     public Item GetTargetItem()
     {
         return _targetItem;
     }
+
     void OnTriggerEnter(Collider other)
     {
         Debug.Log(other.name);

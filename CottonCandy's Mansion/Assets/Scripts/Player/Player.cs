@@ -12,8 +12,6 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Rigidbody))]
 public class Player : MonoBehaviour
 {
-    //REMOVELATER
-    public TMP_Text textthing;
     #region Other Scripts
     [SerializeField] private SlopeDetection SlopeDetection;
     [SerializeField] private PickUpMechanic PickUpMechanic;
@@ -131,6 +129,7 @@ public class Player : MonoBehaviour
     void Update()
     {
         StateMachine.CurrentState.FrameUpdate();
+        _cameraTarget.transform.position = transform.position;
         //RotateCamera();
     }
     void FixedUpdate()
@@ -150,10 +149,6 @@ public class Player : MonoBehaviour
         _jumpBufferTimer -= Time.fixedDeltaTime;
 
         StateMachine.CurrentState.PhysicsUpdate();
-    }
-    void LateUpdate()
-    {
-        _cameraTarget.transform.position = transform.position;
     }
     #endregion
 
@@ -270,6 +265,7 @@ public class Player : MonoBehaviour
         _rotateCoroutine = StartCoroutine(RotateToGravity(targetRotation));
     }
 
+
     private IEnumerator RotateToGravity(Quaternion targetRotation)
     {
         // Rotate until we're effectively at the target.
@@ -277,11 +273,16 @@ public class Player : MonoBehaviour
         {
             float step = RotationSpeed * Time.deltaTime; // degrees per second -> degrees this frame
             transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, step);
+
+            _cameraTarget.position = transform.position;
+            _cameraTarget.transform.up = transform.up;
+
             yield return null;
         }
 
         // Snap exactly and update gravity direction
         transform.rotation = targetRotation;
+        _cameraTarget.position = transform.position;
         _cameraTarget.transform.up = transform.up;
         _gravityDirection = -transform.up;
         _rotateCoroutine = null;
@@ -297,15 +298,28 @@ public class Player : MonoBehaviour
         if(pickUpItem != null)
         { 
             Debug.Log(pickUpItem.gameObject.name);
+
             pickUpItem.UseGravity(false);
+
             PickUpMechanic.PickUpItem(_itemHolder.transform,false,pickUpItem);
+
+            pickUpItem.ChangeExcludeLayerMasks(-1);
+
             InventoryMechanic.AddToInventory(pickUpItem.gameObject);
         }
     }
 
     private void OnDrop()
     {
-        
+        Item itemToDrop = InventoryMechanic.GetCurrentHeldItem();
+        if(itemToDrop != null)
+        {
+            PickUpMechanic.DropItem(null,true,itemToDrop);
+
+            itemToDrop.ChangeExcludeLayerMasks(0);
+
+            InventoryMechanic.RemoveFromInventory(itemToDrop);
+        }
     }
     #endregion
     #region CollisionChecks
@@ -317,6 +331,7 @@ public class Player : MonoBehaviour
         if(_lastObjectHit.TryGetComponent(out GravityChanger gravityChanger))
         {
             ChangeGravityDirection(gravityChanger.GetGravityDirection());
+            InventoryMechanic.ChangeItemGravityDirections(-gravityChanger.GetGravityDirection());
         }
         
     }
@@ -382,10 +397,12 @@ public class Player : MonoBehaviour
     public void EnableInteract()
     {
         _inputReader.EnableInteractAction();
+        EnableDrop();
     }
     public void DisableInteract()
     {
         _inputReader.DiasbleInteractAction();
+        DisableDrop();
     }
     #endregion
     #region  Drop

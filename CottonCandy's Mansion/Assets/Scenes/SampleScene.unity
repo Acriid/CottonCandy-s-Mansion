@@ -4961,7 +4961,7 @@ Transform:
   m_GameObject: {fileID: 727910446}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -7122,8 +7122,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 898003904}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.30476296, y: -0.000000011757276, z: 0.0000000037621546, w: 0.9524282}
-  m_LocalPosition: {x: 9.05866, y: 3.2120535, z: -6.8780217}
+  m_LocalRotation: {x: 0.13102898, y: 3.955579e-16, z: -5.2280286e-17, w: 0.99137855}
+  m_LocalPosition: {x: 9.05866, y: 5.2120533, z: -6.8780217}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -11986,7 +11986,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb3bdbc5547bf04449a4addaebd3591c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player
-  textthing: {fileID: 1657221425}
   SlopeDetection: {fileID: 1678876882}
   PickUpMechanic: {fileID: 1678876883}
   InventoryMechanic: {fileID: 1678876885}
@@ -12162,6 +12161,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InventoryMechanic
   _maxItems: 2
   _heldItems: []
+  _currentHeldItem: {fileID: 0}
 --- !u!1 &1691135658
 GameObject:
   m_ObjectHideFlags: 0
@@ -12765,8 +12765,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1851469609}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.30476293, y: -0.000000011757274, z: 0.000000003762153, w: 0.9524283}
-  m_LocalPosition: {x: 9.05866, y: 3.2120535, z: -6.8780217}
+  m_LocalRotation: {x: 0.13102898, y: 3.7661197e-16, z: 9.106666e-17, w: 0.99137855}
+  m_LocalPosition: {x: 9.05866, y: 5.2120533, z: -6.8780217}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -12863,10 +12863,10 @@ MonoBehaviour:
       Size: {x: 0.8, y: 0.8}
       Offset: {x: 0, y: 0}
   CenterOnActivate: 1
-  TargetOffset: {x: 0, y: 0, z: 0}
+  TargetOffset: {x: 0, y: 2, z: 0}
   Damping: {x: 0, y: 0}
   Lookahead:
-    Enabled: 0
+    Enabled: 1
     Time: 0
     Smoothing: 0
     IgnoreY: 0
@@ -14352,6 +14352,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GravityChanger
   _gravityObject: {fileID: 1248381914}
+--- !u!65 &2126036023 stripped
+BoxCollider:
+  m_CorrespondingSourceObject: {fileID: 8824863541306746292, guid: f46015bc4cff88141b053fc1b843e2dd, type: 3}
+  m_PrefabInstance: {fileID: 6806816364999140488}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1036894113357088616
 Transform:
   m_ObjectHideFlags: 0
@@ -14461,7 +14466,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb3bdbc5547bf04449a4addaebd3591c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player
-  textthing: {fileID: 1657221425}
   SlopeDetection: {fileID: 0}
   PickUpMechanic: {fileID: 0}
   InventoryMechanic: {fileID: 0}
@@ -14680,6 +14684,14 @@ PrefabInstance:
       propertyPath: m_UseGravity
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1023303636779109003, guid: f46015bc4cff88141b053fc1b843e2dd, type: 3}
+      propertyPath: m_Interpolate
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1023303636779109003, guid: f46015bc4cff88141b053fc1b843e2dd, type: 3}
+      propertyPath: m_CollisionDetection
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1272766246308495921, guid: f46015bc4cff88141b053fc1b843e2dd, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.03
@@ -14725,12 +14737,28 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 7b6b3eac618b83d41b1d446eef3495d1, type: 2}
     - target: {fileID: 2115844353548450832, guid: f46015bc4cff88141b053fc1b843e2dd, type: 3}
+      propertyPath: _collider
+      value: 
+      objectReference: {fileID: 2126036023}
+    - target: {fileID: 2115844353548450832, guid: f46015bc4cff88141b053fc1b843e2dd, type: 3}
       propertyPath: _rigidBody
       value: 
       objectReference: {fileID: 1367255672}
+    - target: {fileID: 2115844353548450832, guid: f46015bc4cff88141b053fc1b843e2dd, type: 3}
+      propertyPath: _gravityModifier
+      value: 9.8
+      objectReference: {fileID: 0}
     - target: {fileID: 6836045814254471149, guid: f46015bc4cff88141b053fc1b843e2dd, type: 3}
       propertyPath: m_Name
       value: Item
+      objectReference: {fileID: 0}
+    - target: {fileID: 8824863541306746292, guid: f46015bc4cff88141b053fc1b843e2dd, type: 3}
+      propertyPath: m_ExcludeLayers.m_Bits
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8824863541306746292, guid: f46015bc4cff88141b053fc1b843e2dd, type: 3}
+      propertyPath: m_IncludeLayers.m_Bits
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

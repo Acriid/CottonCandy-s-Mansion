@@ -17,5 +17,5 @@ MonoBehaviour:
   ItemSprite: {fileID: 0}
   rarity: 0
   ItemObject: {fileID: 6836045814254471149, guid: f46015bc4cff88141b053fc1b843e2dd, type: 3}
-  ItemSize: {x: 0, y: 0, z: 0}
-  ItemGravity: 0
+  ItemSize: {x: 0.2, y: 0.2, z: 0.2}
+  ItemGravity: 9.8

@@ -9,6 +9,7 @@ public class Item : MonoBehaviour
     [SerializeField] private Rigidbody _rigidBody;
     [SerializeField] private Collider _collider;
     [SerializeField] private bool _useGravity;
+    [SerializeField] private float _gravityModifier;
     void OnEnable()
     {
         Initialize();
@@ -18,7 +19,7 @@ public class Item : MonoBehaviour
     {
         if(_useGravity)
         {
-            _rigidBody.AddForce(_gravityDirection * ItemSO.ItemGravity,ForceMode.Force);
+            _rigidBody.AddForce(_gravityDirection * _gravityModifier,ForceMode.Force);
         }
     }
     private void Initialize()
@@ -34,13 +35,26 @@ public class Item : MonoBehaviour
         
     }
 
-    public void ChangeUsedLayerMasks(LayerMask layerMask)
+    public void ChangeExcludeLayerMasks(LayerMask layerMask)
     {
-        
+        _collider.excludeLayers = layerMask;
     }
 
     public void UseGravity(bool newValue)
     {
         _useGravity = newValue;
+    }
+    public void ChangeGravityDirection(Vector3 newDirection)
+    {
+        _gravityDirection = newDirection;
+    }
+    public void ChangeGravityModifier(float newValue)
+    {
+        _gravityModifier = newValue;
+    }
+
+    public void KinematicRigidBody(bool newValue)
+    {
+        _rigidBody.isKinematic = newValue;
     }
 }
