@@ -9,6 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d300dfe3ab2185c45a3788e509c2cbd6, type: 3}
-  m_Name: CottonCandy
-  m_EditorClassIdentifier: Assembly-CSharp::CottonCandySO
+  m_Script: {fileID: 11500000, guid: 4831107c4127a074d94535b1e27024f9, type: 3}
+  m_Name: GreatCondition
+  m_EditorClassIdentifier: Assembly-CSharp::ConditionSO
+  Type: 0
+  Weight: 5
+  Description: 12345

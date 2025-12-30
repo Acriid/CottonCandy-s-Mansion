@@ -2,12 +2,22 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "CottonCandy", menuName = "ScriptableObjects/CottonCandySO")]
+[CreateAssetMenu(fileName = "Condition", menuName = "Conditions/Condition")]
 public class ConditionSO : ScriptableObject
 {
     public ConditionType Type;
-    public float Weight;
+    public int Weight;
     public string Description;
+    [SerializeField] private ConditionCommand _conditionCommand;
+
+
+    public void Execute()
+    {
+        _conditionCommand.Execute();
+    }
+
+
+
     public enum ConditionType
     {
         Movement,

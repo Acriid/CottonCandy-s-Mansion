@@ -15,7 +15,7 @@ MonoBehaviour:
   m_DefaultGroup: ae533d05ab7adb442a2391ac710d3099
   m_currentHash:
     serializedVersion: 2
-    Hash: 99927a37da2260be49a4d1bc4dd4e81f
+    Hash: 00000000000000000000000000000000
   m_OptimizeCatalogSize: 0
   m_BuildRemoteCatalog: 0
   m_CatalogRequestsTimeout: 0
@@ -102,6 +102,7 @@ MonoBehaviour:
     - default
     - Items
     - Room
+    - Conditions
   m_SchemaTemplates: []
   m_GroupTemplateObjects:
   - {fileID: 11400000, guid: 738aa7577ef59fa41ae72c20ae5ba97f, type: 2}
