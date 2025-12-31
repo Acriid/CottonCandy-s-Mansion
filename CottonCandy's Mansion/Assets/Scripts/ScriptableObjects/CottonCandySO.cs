@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -18,7 +19,8 @@ public class CottonCandySO : ScriptableObject
     //List of current upsides
     //List of current downsides
 
-    private Dictionary<ConditionSO.ConditionType,int> _dummyConditionDictionary = new();
+    private readonly Dictionary<ConditionSO.ConditionType,int> _dummyConditionIndexDictionary = new();
+
     [SerializeField] private Dictionary<ConditionSO.ConditionType,List<ConditionSO>> _conditionDictionary = new();
 
     private static readonly ConditionSO.ConditionType[] _allTypes =
@@ -32,8 +34,13 @@ public class CottonCandySO : ScriptableObject
     {
         await LoadConditions();
     }
+    public async Task ReloadConditions()
+    {
+        await LoadConditions();
+    }
     private async Task LoadConditions()
     {
+
         var handle = Addressables.LoadAssetsAsync<ConditionSO>(LOADLABLE, null);
         await handle.Task;
 
@@ -62,25 +69,42 @@ public class CottonCandySO : ScriptableObject
         foreach (var c in handle.Result)
         {
             _conditionDictionary[c.Type].Add(c);
+
         }
 
         // Sort once
         foreach (var t in _allTypes)
+        {
             _conditionDictionary[t].Sort(WeightComparer);
+            
+
+            var list = _conditionDictionary[t];
+            int pivot = list.FindIndex(c => c.Weight == 0);
+            _dummyConditionIndexDictionary[t] = pivot;
+        }
 
         
         Addressables.Release(handle);
     }
-
+    public void ShowOffer(Offer offerToShow)
+    {   
+        
+    }
     public Offer GetOffer()
     {
-        int benefitRandom = UnityEngine.Random.Range(0,3);
-        int drawbackRandom = UnityEngine.Random.Range(4,
-         _conditionDictionary[ConditionSO.ConditionType.Movement].Count);
+        ConditionSO.ConditionType conditionType = GetRandomType();
 
+        int pivit = _dummyConditionIndexDictionary[conditionType];
+        int benefitRandom = UnityEngine.Random.Range(0,pivit - 1);
 
-        ConditionSO benefit = _conditionDictionary[ConditionSO.ConditionType.Movement][benefitRandom];
-        ConditionSO drawback = _conditionDictionary[ConditionSO.ConditionType.Movement][drawbackRandom];
+        ConditionSO benefit = _conditionDictionary[conditionType][benefitRandom];
+
+        conditionType = GetRandomType();
+        pivit = _dummyConditionIndexDictionary[conditionType];
+
+        int drawbackRandom = UnityEngine.Random.Range(pivit + 1,_conditionDictionary[conditionType].Count);
+
+        ConditionSO drawback = _conditionDictionary[conditionType][drawbackRandom];
 
         int OfferWeight =  benefit.Weight + drawback.Weight;
         OfferType offerType = OfferType.Neutral;
@@ -114,7 +138,15 @@ public class CottonCandySO : ScriptableObject
         return result;
     }
 
+    //Gets a random type of conditiontype
+    private ConditionSO.ConditionType GetRandomType()
+    {
+        int maxRandom = _allTypes.GetLength(0) - 1;
 
+        int randomIndex = UnityEngine.Random.Range(0,maxRandom);
+
+        return _allTypes[randomIndex];
+    }
 }
 
 public struct Offer
