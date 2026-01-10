@@ -12,12 +12,16 @@ public class InputReader : ScriptableObject
     private InputAction _jumpAction;
     private InputAction _interactAction;
     private InputAction _dropAction;
+    private InputAction _navigateAction;
+    private InputAction _submitAction;
 
     public event Action<Vector2> OnMove;
     public event Action<Vector2> OnLook;
     public event Action OnJump;
     public event Action OnInteract;
     public event Action OnDrop;
+    public event Action OnNavigate;
+    public event Action OnSubmit;
 
     private Action<InputAction.CallbackContext> movePerformed;
     private Action<InputAction.CallbackContext> moveCancled; 
@@ -31,11 +35,15 @@ public class InputReader : ScriptableObject
     private Action<InputAction.CallbackContext> interactPerformed;
     private Action<InputAction.CallbackContext> dropPerformed;
 
+    private Action<InputAction.CallbackContext> navigatePerformed;
+    private Action<InputAction.CallbackContext> submitPerformed;
+
 
     void OnEnable()
     {
         _inputActions = new();
 
+        //Player
         _moveAction = _inputActions.Player.Move;
         _lookAction = _inputActions.Player.Look;
         _jumpAction = _inputActions.Player.Jump;
@@ -53,6 +61,13 @@ public class InputReader : ScriptableObject
         interactPerformed = ctx => OnInteract?.Invoke();
 
         dropPerformed = ctx => OnDrop?.Invoke();
+
+        //Ui
+        _navigateAction = _inputActions.UI.Navigate;
+        _submitAction = _inputActions.UI.Submit;
+
+        navigatePerformed = ctx => OnNavigate?.Invoke();
+        submitPerformed = ctx => OnSubmit?.Invoke();
 
         SubscribeActions();
     }
@@ -113,6 +128,22 @@ public class InputReader : ScriptableObject
         _dropAction.Disable();
     }
 
+    public void EnableNavigateAction()
+    {
+        _navigateAction.Enable();
+    }
+    public void DisableNavigateAction()
+    {
+        _navigateAction.Disable();
+    }
+    public void EnableSubmitAction()
+    {
+        _submitAction.Enable();
+    }
+    public void DisableSubmitAction()
+    {
+        _submitAction.Disable();
+    }
     public void SubscribeActions()
     {
         _moveAction.performed += movePerformed;
@@ -125,6 +156,9 @@ public class InputReader : ScriptableObject
 
         _interactAction.started += interactPerformed;
         _dropAction.started += dropPerformed;
+
+        _navigateAction.performed += navigatePerformed;
+        _submitAction.performed += submitPerformed;
     }
 
     public void UnSubscrubeActions()
@@ -140,5 +174,7 @@ public class InputReader : ScriptableObject
         _interactAction.started -= interactPerformed;
         _dropAction.started -= dropPerformed;
 
+        _navigateAction.performed -= navigatePerformed;
+        _submitAction.performed -= submitPerformed;
     }
 }
