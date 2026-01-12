@@ -12,6 +12,7 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Rigidbody))]
 public class Player : MonoBehaviour
 {
+    #region Variables
     #region Other Scripts
     [SerializeField] private SlopeDetection SlopeDetection;
     [SerializeField] private PickUpMechanic PickUpMechanic;
@@ -27,15 +28,15 @@ public class Player : MonoBehaviour
     #endregion
 
     #region Movement
+    #region General Movement
     [Header("Movement")]
     [SerializeField] private float _playerSpeed;
     [SerializeField] private float _groundDrag;
     [SerializeField] private Transform _groundCheckPoint;
     [SerializeField] private float _groundCheckRadius;
     [SerializeField] private LayerMask _groundLayerMask;
-
     [SerializeField] private float _maxSlopeAngle;
-    
+    #endregion
 
     #region Jump
     [Header("Jump")]
@@ -44,6 +45,8 @@ public class Player : MonoBehaviour
     private float _jumpBufferTimer = 0f;
     [SerializeField] private float _coyoteTime = 0.1f;
     [SerializeField] private float _jumpBufferTime = 0.15f;
+    private int _maxJumps = 1;
+    private int _currentJumps = 0;
     private bool _wasGroundedLastFrame = false;
     #endregion
     #endregion
@@ -83,7 +86,7 @@ public class Player : MonoBehaviour
     const float PLAYERSPEEDOFFSET = 10f;
     const float PLAYERGRAVITYOFFSET = 5f;
     #endregion
-
+    #endregion
 
   
     #region StartFunctions
@@ -138,6 +141,7 @@ public class Player : MonoBehaviour
         if (isGrounded)
         {
             _coyoteTimer = _coyoteTime;
+            _currentJumps = 0;
         }
         else
         {
@@ -153,6 +157,7 @@ public class Player : MonoBehaviour
     #endregion
 
     #region Movement Functions
+    #region Defualt Movement
     public void MovePlayer(Vector2 direction)
     {
 
@@ -191,6 +196,8 @@ public class Player : MonoBehaviour
 
         
     }
+    #endregion
+    #region SpeedControl
     private void SpeedControl()
     {
         Vector3 gravityComp = Vector3.Project(_rigidBody.linearVelocity, _gravityDirection);
@@ -206,7 +213,7 @@ public class Player : MonoBehaviour
             _rigidBody.linearVelocity = clampedNonGravity + gravityComp;
         }
     }
-
+    #endregion
     #endregion
 
     #region First Person Camera
@@ -290,7 +297,7 @@ public class Player : MonoBehaviour
 
     }
     #endregion
-    #region  Interaction
+    #region Interaction
     private void OnInteract()
     {
         Item pickUpItem = PickUpMechanic.GetTargetItem();
@@ -348,23 +355,32 @@ public class Player : MonoBehaviour
     private void OnJump()
     {
         _jumpBufferTimer = _jumpBufferTime;
+        if(CanJump())
+        {
+            ExecuteJump();
+        }
     }
     public bool CanJump()
     {
-        return _jumpBufferTimer > 0f && _coyoteTimer > 0f;
+        bool result = (_jumpBufferTimer > 0f && _coyoteTimer > 0f) || (_currentJumps <= _maxJumps);
+        return result;
     }
     public void ExecuteJump()
     {
+        Debug.Log("Jumped");
         Vector3 gravityComp = Vector3.Project(_rigidBody.linearVelocity, _gravityDirection);
         _rigidBody.linearVelocity -= gravityComp;
-        _rigidBody.AddForce(transform.up * _jumpForce,ForceMode.Impulse);
+        _rigidBody.AddForce(_jumpForce * transform.up,ForceMode.Impulse);
 
+        
+
+        _currentJumps++;
         _jumpBufferTimer = 0f;
         _coyoteTimer = 0f;
     }
     #endregion
 
-    #region  MoveInput
+    #region MoveInput
     public Vector2 GetMoveInput()
     {
         return _moveInput;
@@ -382,7 +398,6 @@ public class Player : MonoBehaviour
         _inputReader.EnableMoveAction();
     }
     #endregion
-
     #region JumpInput
     public void EnableJump()
     {
@@ -393,7 +408,8 @@ public class Player : MonoBehaviour
         _inputReader.DisabelJumpAction();
     }
     #endregion
-    #region  Interact
+
+    #region Interact
     public void EnableInteract()
     {
         _inputReader.EnableInteractAction();
@@ -405,7 +421,7 @@ public class Player : MonoBehaviour
         DisableDrop();
     }
     #endregion
-    #region  Drop
+    #region Drop
     public void EnableDrop()
     {
         _inputReader.EnableDropAction();
@@ -418,17 +434,21 @@ public class Player : MonoBehaviour
     #region Subcriptions
     private void SubscirbeToEvents()
     {
+        //Defualt Movement
         _inputReader.OnMove += UpdateMoveInput;
         _inputReader.OnLook += CameraMovement;
         _inputReader.OnJump += OnJump;
+        //Interaction
         _inputReader.OnInteract += OnInteract;
         _inputReader.OnDrop += OnDrop;
     }
     private void UnSubscribeFromEvents()
     {
+        //Defualt Movement
         _inputReader.OnMove -= UpdateMoveInput;
         _inputReader.OnLook -= CameraMovement;
         _inputReader.OnJump -= OnJump;
+        //Interaction
         _inputReader.OnInteract -= OnInteract;
         _inputReader.OnDrop -= OnDrop;
     }

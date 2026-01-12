@@ -5,11 +5,13 @@ public class CottonCandyManager : MonoBehaviour
 {
     public static CottonCandyManager Instance {get; private set;}
 
+    [SerializeField] private CottonCandySO _cottonCandySO;
     [SerializeField] private GameObject _offerPrefab;
     [SerializeField] private GameObject _poolParent;
     [SerializeField] private int _offerPoolSize;
 
     private GenericPool<CottonCandyOffer> _pool;
+    private CottonCandyOffer _instance;
 
     void Awake()
     {
@@ -23,12 +25,18 @@ public class CottonCandyManager : MonoBehaviour
         _pool = PoolManager.Instance.GetPool<CottonCandyOffer>(_offerPrefab,_offerPoolSize);
         if(_pool == null)
         {
-            Debug.Log("Failed");
+            Debug.Log("Failed to load pool");
         }
-        else
-        {
-            _pool.Get();
-        }
+        ShowOffer(_cottonCandySO.GetOffer());
     }
 
+    private void ShowOffer(Offer offerToShow)
+    {
+        _instance = _pool.Get();
+        _instance.InitializeOffer(offerToShow);
+    }
+    public void HideOffer()
+    {
+        _pool.Return(_instance);
+    }
 }

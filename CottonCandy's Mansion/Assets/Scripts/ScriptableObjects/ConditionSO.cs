@@ -13,7 +13,8 @@ public class ConditionSO : ScriptableObject
 
     public void Execute()
     {
-        _conditionCommand.Execute();
+        Debug.Log("Executed");
+        //_conditionCommand.Execute();
     }
 
 

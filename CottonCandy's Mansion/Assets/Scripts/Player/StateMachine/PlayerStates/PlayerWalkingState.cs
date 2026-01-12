@@ -28,10 +28,10 @@ public class PlayerWalkingState : PlayerState
     {
         base.PhysicsUpdate();
 
-        if (Player.CanJump())
-        {
-            Player.ExecuteJump();
-        }
+        // if (Player.CanJump())
+        // {
+        //     Player.ExecuteJump();
+        // }
         Player.MovePlayer(Player.GetMoveInput());
     }
     public override void AnimationTriggerEvent()
