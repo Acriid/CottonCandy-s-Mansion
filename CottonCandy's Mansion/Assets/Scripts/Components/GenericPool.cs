@@ -9,6 +9,7 @@ public class GenericPool<T> where T : Component
     private Transform _prefabParent;
     private Stack<T> _pool;
     private HashSet<T> _activeInstances;
+    private int _totalCreated = 0;
 
     public GenericPool(GameObject prefab, Transform prefabParent, int initialSize = 0)
     {
@@ -26,7 +27,15 @@ public class GenericPool<T> where T : Component
     private T CreateInstance()
     {
         GameObject obj = Object.Instantiate(_prefab,_prefabParent);
-        T component = obj.GetComponent<T>();
+        obj.name = $"{_prefab.name}_{_totalCreated++}";
+        
+        if(!obj.TryGetComponent<T>(out var component))
+        {
+            Debug.LogError($"Prefab {_prefab.name} does not have componenet {typeof(T).Name}");
+            Object.Destroy(obj);
+            return null;
+        }
+
         obj.SetActive(false);
         _pool.Push(component);
         return component;
@@ -45,8 +54,12 @@ public class GenericPool<T> where T : Component
             instance = CreateInstance();
         }
 
-        instance.gameObject.SetActive(true);
-        _activeInstances.Add(instance);
+        if(instance != null)
+        {
+            instance.gameObject.SetActive(true);
+            _activeInstances.Add(instance);
+        }
+
         return instance;
     }
 
@@ -61,14 +74,15 @@ public class GenericPool<T> where T : Component
 
     public void ReturnAll()
     {
-        foreach(T instance in _activeInstances)
+        var instancesCopy = new List<T>(_activeInstances);
+        foreach(T instance in instancesCopy)
         {
-            instance.gameObject.SetActive(false);
-            _pool.Push(instance);
+            Return(instance);
         }
-        _activeInstances.Clear();;
+
     }
 
     public int ActiveCount => _activeInstances.Count;
     public int PooledCount => _pool.Count;
+    public int TotalCount => _totalCreated;
 }
