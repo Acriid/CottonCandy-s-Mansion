@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using NUnit.Framework;
 using TMPro;
 using Unity.Cinemachine;
 using Unity.VisualScripting;
@@ -45,9 +46,11 @@ public class Player : MonoBehaviour
     private float _jumpBufferTimer = 0f;
     [SerializeField] private float _coyoteTime = 0.1f;
     [SerializeField] private float _jumpBufferTime = 0.15f;
-    private int _maxJumps = 1;
+    [SerializeField] private int _maxJumps = 1;
     private int _currentJumps = 0;
-    private bool _wasGroundedLastFrame = false;
+    private bool _isGrounded = false;
+
+    private event Action OnLand;
     #endregion
     #endregion
 
@@ -109,6 +112,8 @@ public class Player : MonoBehaviour
 
         _rigidBody.freezeRotation = true;
 
+
+        _currentJumps = _maxJumps;
     }
 
     void Start()
@@ -131,27 +136,13 @@ public class Player : MonoBehaviour
     #region UpdateFunctions
     void Update()
     {
+        UpdateJumpState();
+        UpdateTimers();
         StateMachine.CurrentState.FrameUpdate();
         _cameraTarget.transform.position = transform.position;
-        //RotateCamera();
     }
     void FixedUpdate()
     {
-        bool isGrounded = CheckIfGrounded();
-        if (isGrounded)
-        {
-            _coyoteTimer = _coyoteTime;
-            _currentJumps = 0;
-        }
-        else
-        {
-            _coyoteTimer -= Time.fixedDeltaTime;
-        }
-
-        _wasGroundedLastFrame = isGrounded;
-        
-        _jumpBufferTimer -= Time.fixedDeltaTime;
-
         StateMachine.CurrentState.PhysicsUpdate();
     }
     #endregion
@@ -355,28 +346,59 @@ public class Player : MonoBehaviour
     private void OnJump()
     {
         _jumpBufferTimer = _jumpBufferTime;
-        if(CanJump())
-        {
-            ExecuteJump();
-        }
     }
-    public bool CanJump()
-    {
-        bool result = (_jumpBufferTimer > 0f && _coyoteTimer > 0f) || (_currentJumps <= _maxJumps);
-        return result;
-    }
+
     public void ExecuteJump()
     {
-        Debug.Log("Jumped");
         Vector3 gravityComp = Vector3.Project(_rigidBody.linearVelocity, _gravityDirection);
         _rigidBody.linearVelocity -= gravityComp;
         _rigidBody.AddForce(_jumpForce * transform.up,ForceMode.Impulse);
 
         
-
-        _currentJumps++;
+        _currentJumps--;
         _jumpBufferTimer = 0f;
         _coyoteTimer = 0f;
+    }
+
+    private void UpdateJumpState()
+    {
+        bool wasGrounded = _isGrounded;
+        _isGrounded = CheckIfGrounded();
+
+        if(_isGrounded && !wasGrounded)
+        {
+            OnLanded();
+        }
+        if(_isGrounded)
+        {
+            _coyoteTimer = _coyoteTime;
+        }
+
+    }
+
+    private void UpdateTimers()
+    {
+        if(_coyoteTimer > 0f)
+            _coyoteTimer -= Time.deltaTime;
+        if(_jumpBufferTimer > 0f)
+            _jumpBufferTimer -= Time.deltaTime;
+    }
+    private void OnLanded()
+    {
+        _currentJumps = _maxJumps;
+    }
+    public void ProcessJumpBuffer()
+    {
+        if(_jumpBufferTimer > 0f)
+        {
+            bool canCoyoteJump = _coyoteTimer > 0 && _currentJumps > 0;
+            bool canAirJump = _currentJumps > 0 && _currentJumps != _maxJumps;
+
+            if(canCoyoteJump || canAirJump)
+            {
+                ExecuteJump();
+            }
+        }
     }
     #endregion
 
@@ -452,5 +474,6 @@ public class Player : MonoBehaviour
         _inputReader.OnInteract -= OnInteract;
         _inputReader.OnDrop -= OnDrop;
     }
+
     #endregion
 }

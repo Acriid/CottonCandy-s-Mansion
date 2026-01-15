@@ -6,6 +6,7 @@ using UnityEngine.InputSystem;
 [CreateAssetMenu(fileName = "InputReader", menuName = "Inputs/InputReader")]
 public class InputReader : ScriptableObject
 {
+    #region InputAction Variables
     private InputActions _inputActions;   
     private InputAction _moveAction;
     private InputAction _lookAction;
@@ -14,15 +15,21 @@ public class InputReader : ScriptableObject
     private InputAction _dropAction;
     private InputAction _navigateAction;
     private InputAction _submitAction;
+    #endregion
 
+    #region public Event Action Variables
     public event Action<Vector2> OnMove;
     public event Action<Vector2> OnLook;
     public event Action OnJump;
+    public event Action OnJumpHold;
     public event Action OnInteract;
     public event Action OnDrop;
     public event Action OnNavigate;
     public event Action OnSubmit;
 
+    #endregion
+
+    #region Action Variables
     private Action<InputAction.CallbackContext> movePerformed;
     private Action<InputAction.CallbackContext> moveCancled; 
 
@@ -30,13 +37,14 @@ public class InputReader : ScriptableObject
     private Action<InputAction.CallbackContext> lookCancled;
 
     private Action<InputAction.CallbackContext> jumpPerformed;
-
+    private Action<InputAction.CallbackContext> jumpHold;
 
     private Action<InputAction.CallbackContext> interactPerformed;
     private Action<InputAction.CallbackContext> dropPerformed;
 
     private Action<InputAction.CallbackContext> navigatePerformed;
     private Action<InputAction.CallbackContext> submitPerformed;
+    #endregion
 
 
     void OnEnable()
@@ -44,30 +52,14 @@ public class InputReader : ScriptableObject
         _inputActions = new();
 
         //Player
-        _moveAction = _inputActions.Player.Move;
-        _lookAction = _inputActions.Player.Look;
-        _jumpAction = _inputActions.Player.Jump;
-        _interactAction = _inputActions.Player.Interact;
-        _dropAction = _inputActions.Player.Drop;
+        InitializePlayerActions();
+        InitializePlayerEvents();
 
-        movePerformed = ctx => OnMove?.Invoke(ctx.ReadValue<Vector2>());
-        moveCancled = ctx => OnMove?.Invoke(Vector2.zero);
-
-        lookPerformed = ctx => OnLook?.Invoke(ctx.ReadValue<Vector2>());
-        lookCancled = ctx => OnLook?.Invoke(Vector2.zero);
-
-        jumpPerformed = ctx => OnJump?.Invoke();
-
-        interactPerformed = ctx => OnInteract?.Invoke();
-
-        dropPerformed = ctx => OnDrop?.Invoke();
 
         //Ui
-        _navigateAction = _inputActions.UI.Navigate;
-        _submitAction = _inputActions.UI.Submit;
+        InitializeUIActions();
+        InitializeUIEvents();
 
-        navigatePerformed = ctx => OnNavigate?.Invoke();
-        submitPerformed = ctx => OnSubmit?.Invoke();
 
         SubscribeActions();
     }
@@ -80,9 +72,44 @@ public class InputReader : ScriptableObject
     {
         OnDisable();
     }
+    #region InitializeActions
+    private void InitializePlayerActions()
+    {
+        _moveAction = _inputActions.Player.Move;
+        _lookAction = _inputActions.Player.Look;
+        _jumpAction = _inputActions.Player.Jump;
+        _interactAction = _inputActions.Player.Interact;
+        _dropAction = _inputActions.Player.Drop;
+    }
+    private void InitializeUIActions()
+    {
+        _navigateAction = _inputActions.UI.Navigate;
+        _submitAction = _inputActions.UI.Submit;       
+    }
+    #endregion
+    #region Initialize Events
+    private void InitializePlayerEvents()
+    {
+        movePerformed = ctx => OnMove?.Invoke(ctx.ReadValue<Vector2>());
+        moveCancled = ctx => OnMove?.Invoke(Vector2.zero);
 
-    
-    
+        lookPerformed = ctx => OnLook?.Invoke(ctx.ReadValue<Vector2>());
+        lookCancled = ctx => OnLook?.Invoke(Vector2.zero);
+
+        jumpPerformed = ctx => OnJump?.Invoke();
+
+        interactPerformed = ctx => OnInteract?.Invoke();
+
+        dropPerformed = ctx => OnDrop?.Invoke();       
+    }
+
+    private void InitializeUIEvents()
+    {
+        navigatePerformed = ctx => OnNavigate?.Invoke();
+        submitPerformed = ctx => OnSubmit?.Invoke();       
+    }
+    #endregion
+    #region Enable/DisableActions
     public void EnableMoveAction()
     {
         _moveAction.Enable();
@@ -144,6 +171,8 @@ public class InputReader : ScriptableObject
     {
         _submitAction.Disable();
     }
+    #endregion
+    #region Subscribe/Unsubscribe actions
     public void SubscribeActions()
     {
         _moveAction.performed += movePerformed;
@@ -177,4 +206,5 @@ public class InputReader : ScriptableObject
         _navigateAction.performed -= navigatePerformed;
         _submitAction.performed -= submitPerformed;
     }
+    #endregion
 }

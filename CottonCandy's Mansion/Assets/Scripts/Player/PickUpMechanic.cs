@@ -83,7 +83,6 @@ public class PickUpMechanic : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        Debug.Log(other.name);
         if (((1 << other.gameObject.layer) & _itemLayer) == 0) 
             return;
 

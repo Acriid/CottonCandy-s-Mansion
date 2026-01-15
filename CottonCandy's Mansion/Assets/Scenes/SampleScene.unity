@@ -12977,9 +12977,10 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   _maxSlopeAngle: 0
-  _jumpForce: 12
+  _jumpForce: 20
   _coyoteTime: 0.1
   _jumpBufferTime: 0.15
+  _maxJumps: 1
   _cameraTarget: {fileID: 727910447}
   _orientation: {fileID: 1059367340}
   _lookSensitivity: 125
@@ -15734,6 +15735,7 @@ MonoBehaviour:
   _jumpForce: 12
   _coyoteTime: 0.1
   _jumpBufferTime: 0.15
+  _maxJumps: 3
   _cameraTarget: {fileID: 0}
   _orientation: {fileID: 2647260989738049413}
   _lookSensitivity: 125

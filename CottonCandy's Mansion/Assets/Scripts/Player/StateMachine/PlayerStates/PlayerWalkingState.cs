@@ -27,11 +27,7 @@ public class PlayerWalkingState : PlayerState
     public override void PhysicsUpdate()
     {
         base.PhysicsUpdate();
-
-        // if (Player.CanJump())
-        // {
-        //     Player.ExecuteJump();
-        // }
+        Player.ProcessJumpBuffer();
         Player.MovePlayer(Player.GetMoveInput());
     }
     public override void AnimationTriggerEvent()
