@@ -21,7 +21,6 @@ public class InputReader : ScriptableObject
     public event Action<Vector2> OnMove;
     public event Action<Vector2> OnLook;
     public event Action OnJump;
-    public event Action OnJumpHold;
     public event Action OnInteract;
     public event Action OnDrop;
     public event Action OnNavigate;

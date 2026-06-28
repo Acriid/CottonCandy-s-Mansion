@@ -1,0 +1,24 @@
+# Fdb version 4
+["pdflatex"] 1782556746.1431 "c:/Personal Project/CottonCandy-s-Mansion/Design Document/main.tex" "main.pdf" "main" 1782556746.93226 0
+  "c:/Personal Project/CottonCandy-s-Mansion/Design Document/main.tex" 1782556743 658 92412a41967a028875acdeb5a8235b57 ""
+  "c:/texlive/2025/texmf-dist/fonts/map/fontname/texfonts.map" 1770218068 3524 cb3e574dea2d1052e39280babc910dc8 ""
+  "c:/texlive/2025/texmf-dist/fonts/tfm/public/cm/cmbx10.tfm" 1770217424 1328 c834bbb027764024c09d3d2bf908b5f0 ""
+  "c:/texlive/2025/texmf-dist/fonts/tfm/public/cm/cmbx12.tfm" 1770217424 1324 c910af8c371558dc20f2d7822f66fe64 ""
+  "c:/texlive/2025/texmf-dist/fonts/tfm/public/cm/cmr12.tfm" 1770217424 1288 655e228510b4c2a1abe905c368440826 ""
+  "c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb" 1770216890 34811 78b52f49e893bcba91bd7581cdc144c0 ""
+  "c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb" 1770216890 32080 340ef9bf63678554ee606688e7b5339d ""
+  "c:/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb" 1770216890 35752 024fb6c41858982481f6968b5fc26508 ""
+  "c:/texlive/2025/texmf-dist/tex/latex/base/article.cls" 1770218630 20144 b966087dda3b194755eb460d32e2ef75 ""
+  "c:/texlive/2025/texmf-dist/tex/latex/base/size10.clo" 1770218631 8448 686612a86f0e04f41ea577f5ec7e83d8 ""
+  "c:/texlive/2025/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def" 1770218604 30662 bfd6e864f4ffc5018b0e2b6260c3181c ""
+  "c:/texlive/2025/texmf-dist/web2c/texmf.cnf" 1770216800 42213 4e2ca030e8e2640502016e9e45868dcb ""
+  "c:/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1770221132 5587484 49bd08ff372a6985d7d70778694ddaac ""
+  "c:/texlive/2025/texmf-var/web2c/pdftex/pdflatex.fmt" 1770221356 3636161 2ec4a537dfac11f5bf7f7a83e4357dab ""
+  "c:/texlive/2025/texmf.cnf" 1770221109 713 e69b156964470283e0530f5060668171 ""
+  "main.aux" 1782556746 546 d98c256223295046113845ba66b97022 "pdflatex"
+  "main.tex" 1782556743 658 92412a41967a028875acdeb5a8235b57 ""
+  (generated)
+  "main.aux"
+  "main.log"
+  "main.pdf"
+  (rewritten before read)

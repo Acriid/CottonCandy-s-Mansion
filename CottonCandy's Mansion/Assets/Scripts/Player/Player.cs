@@ -4,6 +4,7 @@ using NUnit.Framework;
 using TMPro;
 using Unity.Cinemachine;
 using Unity.VisualScripting;
+using UnityEditor.Build;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -50,7 +51,6 @@ public class Player : MonoBehaviour
     private int _currentJumps = 0;
     private bool _isGrounded = false;
 
-    private event Action OnLand;
     #endregion
     #endregion
 
@@ -95,30 +95,64 @@ public class Player : MonoBehaviour
     #region StartFunctions
     void Awake()
     {
-        if(_inputReader == null){Debug.LogError("InputReader does not exists"); return;}
-        if(_rigidBody == null){_rigidBody = GetComponent<Rigidbody>();}
-        if(SlopeDetection == null){SlopeDetection = GetComponent<SlopeDetection>();}
-        if(PickUpMechanic == null){PickUpMechanic = GetComponent<PickUpMechanic>();}
 
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        if(!InitializeComponents()) return;
+        InitializeStateMachine();
+
+        ChangeCursorState(false);
+
+        EnableLookAction();
+
+        SubscribeToEvents();
+
+        ChangeRigidBodyFreeze(true);
+
+
+        ResetJumps();
+    }
+    private bool InitializeComponents()
+    {
+        if(_inputReader == null) return false;
+        if(!TryGetComponent(out _rigidBody)) return false;
+        if(!TryGetComponent(out SlopeDetection)) return false;
+        if(!TryGetComponent(out PickUpMechanic)) return false;
+        return true;
+    }
+    private void InitializeStateMachine()
+    {
+        StateMachine ??= new();
+        WalkingState ??= new(this,StateMachine);
+    }
+    private void EnableLookAction()
+    {
+        if(_inputReader != null)
         _inputReader.EnableLookAction();
-
-
-        StateMachine = new();
-        WalkingState = new(this,StateMachine);
-
-        SubscirbeToEvents();
-
-        _rigidBody.freezeRotation = true;
-
-
+    }
+    private void ResetJumps()
+    {
         _currentJumps = _maxJumps;
     }
-
+    private void ChangeCursorState(bool newValue)
+    {
+        if(!newValue)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+    }
+    private void ChangeRigidBodyFreeze(bool newValue)
+    {
+        if(_rigidBody != null)
+        _rigidBody.freezeRotation = newValue;
+    }
     void Start()
     {
-        StateMachine.Initialize(WalkingState);
+        StateMachine?.Initialize(WalkingState);
     }
     #endregion
 
@@ -138,12 +172,12 @@ public class Player : MonoBehaviour
     {
         UpdateJumpState();
         UpdateTimers();
-        StateMachine.CurrentState.FrameUpdate();
+        StateMachine?.CurrentState.FrameUpdate();
         _cameraTarget.transform.position = transform.position;
     }
     void FixedUpdate()
     {
-        StateMachine.CurrentState.PhysicsUpdate();
+        StateMachine?.CurrentState.PhysicsUpdate();
     }
     #endregion
 
@@ -454,7 +488,8 @@ public class Player : MonoBehaviour
     }
     #endregion
     #region Subcriptions
-    private void SubscirbeToEvents()
+
+    private void SubscribeToEvents()
     {
         //Defualt Movement
         _inputReader.OnMove += UpdateMoveInput;
@@ -476,4 +511,16 @@ public class Player : MonoBehaviour
     }
 
     #endregion
+
+    #region Attributes
+    public float GetPlayerSpeed()
+    {
+        return _playerSpeed;
+    }
+    public void ChangePlayerSpeed(float newSpeed)
+    {
+        _playerSpeed = newSpeed;
+    }
+    #endregion
 }
+
