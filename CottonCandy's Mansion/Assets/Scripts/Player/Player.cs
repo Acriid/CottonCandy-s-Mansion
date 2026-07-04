@@ -9,7 +9,6 @@ using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(SlopeDetection))]
 [RequireComponent(typeof(PickUpMechanic))]
 [RequireComponent(typeof(Rigidbody))]
 public class Player : MonoBehaviour

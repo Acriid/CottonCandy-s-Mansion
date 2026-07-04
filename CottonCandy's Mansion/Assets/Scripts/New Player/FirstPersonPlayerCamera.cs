@@ -7,12 +7,11 @@ public class FirstPersonPlayerCamera : MonoBehaviour
 {
     #region Variables
     [SerializeField] private InputReader _inputReader;
-    [SerializeField] private float _lookSensitivity = 20f;
-
 
     [SerializeField] private Transform _orientation;
     [SerializeField] private Transform _playerTransform;
     [SerializeField] private Transform _firstPersonCameraTransform;
+    [SerializeField] private PlayerSettingsSO _playerSettings;
     private float _yRotation = 0f;
     private float _xRotation = 0f;
     private float _maxLookRange = 90f;
@@ -27,7 +26,7 @@ public class FirstPersonPlayerCamera : MonoBehaviour
         DisableInputs();
     }
 
-    void Update()
+    void LateUpdate()
     {
         RotateCamera();
     }
@@ -62,8 +61,8 @@ public class FirstPersonPlayerCamera : MonoBehaviour
     /// <param name="direction">The direction the player moves their mouse</param>
     private void CameraMovement(Vector2 direction)
     {
-        float lookX = direction.x * _lookSensitivity * Time.deltaTime;
-        float lookY = direction.y * _lookSensitivity * Time.deltaTime;
+        float lookX = direction.x * _playerSettings.PlayerLookSensitivity * Time.deltaTime;
+        float lookY = direction.y * _playerSettings.PlayerLookSensitivity * Time.deltaTime;
 
         _yRotation += lookX;
         _xRotation -= lookY;
