@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Player_New : MonoBehaviour
+public class Player : MonoBehaviour
 {
     [SerializeField] private InputReader _inputReader;
     [SerializeField] private Rigidbody _rigidBody;
