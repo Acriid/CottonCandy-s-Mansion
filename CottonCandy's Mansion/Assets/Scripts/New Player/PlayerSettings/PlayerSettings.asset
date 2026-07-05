@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: PlayerSettings
   m_EditorClassIdentifier: Assembly-CSharp::PlayerSettingsSO
   PlayerLookSensitivity: 20
-  PlayerSpeed: 70
+  PlayerSpeed: 7
   PlayerDrag: 8
   PlayerGravityDirection: {x: 0, y: -1, z: 0}
   PlayerGravityModifier: 9.8

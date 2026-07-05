@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 
-public class SlopeDetection
+public class SlopeDetection : ISlopeDetection
 {
     private PlayerSlopeSettingsSO _slopeSettings;
     private float _minDotProduct;
@@ -82,7 +82,22 @@ public class SlopeDetection
         }
     }
 
-    public void OnCollisionStay(Collision collision)
+
+
+    // --- Public API ---
+    public bool IsGrounded() => _isGrounded;
+    public bool IsOnSlope() => _isOnSlope;
+    public float GetSlopeAngle() => _currentSlopeAngle;
+    public Vector3 GetGroundNormal() => _groundNormal;
+    public bool IsOnWalkableSlope() => IsOnSlope() && _currentSlopeAngle <= _slopeSettings.MaxSlopeAngle;
+
+    public Vector3 GetSlopeMoveDirection(Vector3 inputDirection)
+    {
+        if (!_isGrounded) return inputDirection;
+        return Vector3.ProjectOnPlane(inputDirection, _groundNormal).normalized;
+    }
+
+    public void OnCollisionStayLogic(Collision collision)
     {
         if (((1 << collision.gameObject.layer) & _slopeSettings.PlayerGroundLayerMask) == 0)
             return;
@@ -99,25 +114,12 @@ public class SlopeDetection
         _hasCollisionData = _groundContacts.Count > 0;
     }
 
-    public void OnCollisionExit(Collision collision)
+    public void OnCollisionExitLogic(Collision collision)
     {
         if (((1 << collision.gameObject.layer) & _slopeSettings.PlayerGroundLayerMask) == 0)
             return;
 
         _groundContacts.Clear();
         _hasCollisionData = false;
-    }
-
-    // --- Public API ---
-    public bool IsGrounded() => _isGrounded;
-    public bool IsOnSlope() => _isOnSlope;
-    public float GetSlopeAngle() => _currentSlopeAngle;
-    public Vector3 GetGroundNormal() => _groundNormal;
-    public bool IsOnWalkableSlope() => IsOnSlope() && _currentSlopeAngle <= _slopeSettings.MaxSlopeAngle;
-
-    public Vector3 GetSlopeMoveDirection(Vector3 inputDirection)
-    {
-        if (!_isGrounded) return inputDirection;
-        return Vector3.ProjectOnPlane(inputDirection, _groundNormal).normalized;
     }
 }

@@ -1,33 +1,27 @@
-using System;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class Player_New : MonoBehaviour
 {
     [SerializeField] private InputReader _inputReader;
     [SerializeField] private Rigidbody _rigidBody;
-    [SerializeField] private Transform _orientation;
     [SerializeField] private Transform _groundCheckPoint;
     [SerializeField] private PlayerSettingsSO _playerSettings;
     [SerializeField] private PlayerSlopeSettingsSO _playerSlopeSettings;
     [SerializeField] private Camera _mainCamera;
 
 
-    private SlopeDetection _slopeDetection;
+    private ISlopeDetection _slopeDetection;
+    private IPhysicsChecks _physicsChecks;
     private Vector2 _moveInput;
+
+    const float PLAYERSPEEDOFFSET = 10f;
+    const float PLAYERGRAVITYOFFSET = 2f;
     void Awake()
     {
-        // if(!TryGetComponent(out _rigidBody))
-        // {
-        //     Debug.LogWarning("No RigidBody found on the player");
-        // }
-
-        // if(_orientation == null)
-        // {
-        //     Debug.LogWarning("No player orientation");
-        // }
-        _slopeDetection = new(_playerSlopeSettings,this.transform);
+        Physics.simulationMode = SimulationMode.FixedUpdate;
+        InitializePlayer();
     }
+
     void FixedUpdate()
     {
         _slopeDetection.FixedUpdateLogic();
@@ -41,16 +35,7 @@ public class Player_New : MonoBehaviour
     {
         DisableMoveInput();
     }
-    public void EnableMoveInput()
-    {
-        _inputReader.OnMove += UpdateMoveInput;
-        _inputReader.EnableMoveAction();
-    }
-    public void DisableMoveInput()
-    {
-        _inputReader.OnMove -= UpdateMoveInput;
-        _inputReader.DisableMoveAction();
-    }
+
     private void UpdateMoveInput(Vector2 moveInput)
     {
         _moveInput = moveInput;
@@ -88,20 +73,23 @@ public class Player_New : MonoBehaviour
         {
             moveDirection = _slopeDetection.GetSlopeMoveDirection(moveDirection);
         }
-        _rigidBody.AddForce(_playerSettings.PlayerSpeed * moveDirection.normalized, ForceMode.Force);
+        _rigidBody.AddForce(_playerSettings.PlayerSpeed * PLAYERSPEEDOFFSET * moveDirection.normalized, ForceMode.Force);
 
-        if(!EntityPhysicsChecks.CheckIfGrounded(_groundCheckPoint,_playerSettings.PlayerGroundLayerMask) 
+        if(!_physicsChecks.CheckIfGrounded(_groundCheckPoint,_playerSettings.PlayerGroundLayerMask) 
             && !_slopeDetection.IsOnWalkableSlope())
         {
-            _rigidBody.linearVelocity += _playerSettings.PlayerGravityModifier * 
+            _rigidBody.linearVelocity += _playerSettings.PlayerGravityModifier * PLAYERGRAVITYOFFSET * 
             Time.fixedDeltaTime * _playerSettings.PlayerGravityDirection.normalized;
         }
 
 
-        _rigidBody.linearDamping = EntityPhysicsChecks.CheckIfGrounded(_groundCheckPoint,_playerSettings.PlayerGroundLayerMask) ? 
+        _rigidBody.linearDamping = _physicsChecks.CheckIfGrounded(_groundCheckPoint,_playerSettings.PlayerGroundLayerMask) ? 
                                     _playerSettings.PlayerDrag : 0f;
         SpeedControl();
     }
+    /// <summary>
+    /// Controls the speed of the player is always called at the end of MovePlayer
+    /// </summary>
     private void SpeedControl()
     {
         Vector3 gravityComp = Vector3.Project(_rigidBody.linearVelocity, _playerSettings.PlayerGravityDirection);
@@ -117,6 +105,49 @@ public class Player_New : MonoBehaviour
             _rigidBody.linearVelocity = clampedNonGravity + gravityComp;
         }
     }
+
+
+    void OnCollisionStay(Collision collision)
+    {
+        _slopeDetection.OnCollisionStayLogic(collision);
+    }
+    void OnCollisionExit(Collision collision)
+    {
+        _slopeDetection.OnCollisionExitLogic(collision);
+    }
+
+    //Public API
+    public void InitializePlayer()
+    {
+        _slopeDetection = new SlopeDetection(_playerSlopeSettings,this.transform);
+        _physicsChecks = new PhysicsChecks();
+
+    }
+
+    public void InitializeSettings()
+    {
+        _playerSettings.Initialize();
+        _playerSlopeSettings.Initialize();        
+    }
+    public void EnableMoveInput()
+    {
+        _inputReader.OnMove += UpdateMoveInput;
+        _inputReader.EnableMoveAction();
+    }
+    public void DisableMoveInput()
+    {
+        _inputReader.OnMove -= UpdateMoveInput;
+        _inputReader.DisableMoveAction();
+    }
+    #region getters and setters
+    public void SetInputReader(InputReader inputReader)
+    {
+        _inputReader = inputReader;
+    }
+    public InputReader GetInputReader()
+    {
+        return _inputReader;
+    }
     public void SetRigidBody(Rigidbody rigidBody)
     {
         _rigidBody = rigidBody;
@@ -125,13 +156,54 @@ public class Player_New : MonoBehaviour
     {
         return _rigidBody;
     }
+    public void SetGroundCheckPoint(Transform newCheckPoint)
+    {
+        _groundCheckPoint = newCheckPoint;
+    }
+    public Transform GetGroundCheckPoint()
+    {
+        return _groundCheckPoint;
+    }
+    public void SetPlayerSettings(PlayerSettingsSO playerSettingsSO)
+    {
+        _playerSettings = playerSettingsSO;
+    }
+    public PlayerSettingsSO GetPlayerSettings()
+    {
+        return _playerSettings;
+    }
+    public void SetPlayerSlopeSettings(PlayerSlopeSettingsSO playerSlopeSettingsSO)
+    {
+        _playerSlopeSettings = playerSlopeSettingsSO;
+    }
+    public PlayerSlopeSettingsSO GetPlayerSlopeSettings()
+    {
+        return _playerSlopeSettings;
+    }
+    public void SetMainCamera(Camera camera)
+    {
+        _mainCamera = camera;
+    }
+    public Camera GetMainCamera()
+    {
+        return _mainCamera;
+    }
+    public void SetSlopeDetection(ISlopeDetection slopeDetection)
+    {
+        _slopeDetection = slopeDetection;
+    }
+    public ISlopeDetection GetSlopeDetection()
+    {
+        return _slopeDetection;
+    }
+    public void SetPhysicsChecks(IPhysicsChecks physicsChecks)
+    {
+        _physicsChecks = physicsChecks;
+    }
+    public IPhysicsChecks GetPhysicsChecks()
+    {
+        return _physicsChecks;
+    }
 
-    void OnCollisionStay(Collision collision)
-    {
-        _slopeDetection.OnCollisionStay(collision);
-    }
-    void OnCollisionExit(Collision collision)
-    {
-        _slopeDetection.OnCollisionExit(collision);
-    }
+    #endregion
 }

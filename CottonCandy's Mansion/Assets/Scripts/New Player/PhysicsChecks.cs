@@ -1,8 +1,8 @@
 using UnityEngine;
 
-public static class EntityPhysicsChecks
+public class PhysicsChecks : IPhysicsChecks
 {
-    public static bool CheckIfGrounded(Transform checkTransform, LayerMask groundLayer, float checkRadius = 0.2f)
+    public bool CheckIfGrounded(Transform checkTransform, LayerMask groundLayer, float checkRadius = 0.2f)
     {
         if (checkTransform == null) return false;
         Vector3 groundPoint = checkTransform.position;

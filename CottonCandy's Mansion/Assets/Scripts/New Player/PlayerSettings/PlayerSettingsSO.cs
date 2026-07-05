@@ -8,7 +8,7 @@ public class PlayerSettingsSO : ScriptableObject
     public float PlayerLookSensitivity = 20f;
 
     [Header("Player Movement")]
-    public float PlayerSpeed = 125f;
+    public float PlayerSpeed = 12.5f;
     public float PlayerDrag = 8f;
 
 
@@ -16,4 +16,9 @@ public class PlayerSettingsSO : ScriptableObject
     public Vector3 PlayerGravityDirection = new(0f,-1f,0f);
     public float PlayerGravityModifier = 9.8f;
     public LayerMask PlayerGroundLayerMask;
+
+        public void Initialize()
+    {
+        PlayerGroundLayerMask = LayerMask.GetMask("Floor"); 
+    }
 }
