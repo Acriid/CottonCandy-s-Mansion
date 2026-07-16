@@ -34,7 +34,7 @@ public class GravityChanger : MonoBehaviour, IGravity
         {
             if(collision.gameObject.TryGetComponent(out Player playerComponent))
             {
-                ChangeGravity(ref playerComponent.GetPlayerSettings().PlayerGravityDirection);
+                playerComponent.SetGravityDirection(_gravityDirection);
             }
         }
     }

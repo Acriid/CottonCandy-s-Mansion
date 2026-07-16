@@ -1,4 +1,6 @@
+using System.Collections;
 using UnityEngine;
+using System;
 
 public class Player : MonoBehaviour
 {
@@ -121,6 +123,7 @@ public class Player : MonoBehaviour
     {
         _slopeDetection = new SlopeDetection(_playerSlopeSettings,this.transform);
         _physicsChecks = new PhysicsChecks();
+        _playerSettings = Instantiate(_playerSettings);
 
     }
 
@@ -205,5 +208,50 @@ public class Player : MonoBehaviour
         return _physicsChecks;
     }
 
+    public void SetGravityDirection(Vector3 newDirection)
+    {
+        _playerSettings.PlayerGravityDirection = newDirection;
+
+        StartCoroutine(ChangeTransformUpOverTime());
+    }
+    private IEnumerator ChangeTransformUpOverTime()
+    {
+        float totalTime = _playerSettings.PlayerTimeToRotate;
+        float elapsedTime = 0f;
+
+        Vector3 startUp = transform.up;
+        Vector3 newUp = -_playerSettings.PlayerGravityDirection;
+        while(transform.up != newUp && elapsedTime < totalTime)
+        {
+            elapsedTime += Time.deltaTime;
+            float rotationSteps = elapsedTime / totalTime;
+            transform.up = Vector3.Slerp(startUp, newUp, rotationSteps);
+            yield return null;
+        }
+
+        transform.up = newUp;
+    }
+    public Vector3 GetGravityDirection()
+    {
+        return _playerSettings.PlayerGravityDirection;
+    }
+    //Debug function
+    private DateTime DisplayCurrentTime()
+    {
+        DateTime currentDeviceTime = DateTime.Now; 
+
+        DisplayTime(currentDeviceTime);
+   
+        return currentDeviceTime;
+    }
+    private void DisplayTime(DateTime timeToDisplay)
+    {
+        int hour = timeToDisplay.Hour;
+        int minute = timeToDisplay.Minute;
+        int second = timeToDisplay.Second;
+        int milliseconds = timeToDisplay.Millisecond;
+
+        Debug.Log($"Current Time: {hour}:{minute}:{second}:{milliseconds}");         
+    }
     #endregion
 }

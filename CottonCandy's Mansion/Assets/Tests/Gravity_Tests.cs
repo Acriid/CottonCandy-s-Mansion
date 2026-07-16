@@ -7,6 +7,8 @@ using UnityEngine.UIElements;
 
 public class Gravity_Tests
 {
+    private Player _playerComponent;
+    private GameObject _playerObject;
     private PlayerSettingsSO _playerSettingsSO;
     private GameObject _gravityObject;
     private GravityChanger _gravityChanger;
@@ -17,6 +19,10 @@ public class Gravity_Tests
         _gravityObject = new();
         _gravityChanger = _gravityObject.AddComponent<GravityChanger>();
         _gravityChanger.SetGravityDirection(Vector3.down);
+
+        _playerObject = new();
+        _playerComponent = _playerObject.AddComponent<Player>();
+        _playerComponent.SetPlayerSettings(_playerSettingsSO);
     }
     [TearDown]
     public void GravityTearDown()
@@ -32,17 +38,6 @@ public class Gravity_Tests
         _gravityChanger.SetGravityDirection(newDirection);
 
         Assert.AreEqual(newDirection,_gravityChanger.GetGravityDirection());
-    }
-    [Test]
-    public void Gravity_GravitySetTest()
-    {
-        Vector3 originalDirection = _gravityChanger.GetGravityDirection();
-
-        Vector3 directionToChange = Vector3.zero;
-
-        _gravityChanger.ChangeGravity(ref directionToChange);
-
-        Assert.AreEqual(originalDirection,directionToChange);
     }
 
 }

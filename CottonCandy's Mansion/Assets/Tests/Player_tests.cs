@@ -156,4 +156,14 @@ public class Player_Tests
         Assert.AreEqual(result,true);  
     }
 
+    [Test]
+    public void Player_GravityDirectionTest()
+    {
+        Vector3 newDirection = new(UnityEngine.Random.Range(0f,1f),UnityEngine.Random.Range(0f,1f),UnityEngine.Random.Range(0f,1f));
+
+        _playerComponent.SetGravityDirection(newDirection);
+
+        Assert.AreEqual(newDirection,_playerComponent.GetGravityDirection());
+    }
+
 }

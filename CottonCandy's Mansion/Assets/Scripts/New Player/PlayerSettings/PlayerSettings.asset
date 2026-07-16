@@ -20,3 +20,4 @@ MonoBehaviour:
   PlayerGroundLayerMask:
     serializedVersion: 2
     m_Bits: 8
+  PlayerTimeToRotate: 0.75

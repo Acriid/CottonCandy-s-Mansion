@@ -16,8 +16,8 @@ public class PlayerSettingsSO : ScriptableObject
     public Vector3 PlayerGravityDirection = new(0f,-1f,0f);
     public float PlayerGravityModifier = 9.8f;
     public LayerMask PlayerGroundLayerMask;
-
-        public void Initialize()
+    public float PlayerTimeToRotate = 1f;
+    public void Initialize()
     {
         PlayerGroundLayerMask = LayerMask.GetMask("Floor"); 
     }
