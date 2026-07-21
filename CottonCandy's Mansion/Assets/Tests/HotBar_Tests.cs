@@ -10,13 +10,12 @@ public class HotBar_Tests
     [SetUp]
     public void HotBar_Setup()
     {
-        _playerTestObject = new();
-        _playerHotbar = _playerTestObject.AddComponent<HotBar>();
+        _playerHotbar = new();
     }
     [TearDown]
     public void HotBar_Teardown()
     {
-        GameObject.DestroyImmediate(_playerTestObject);
+        _playerHotbar = null;
     }
     // A Test behaves as an ordinary method
     [Test]

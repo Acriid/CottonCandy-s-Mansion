@@ -1721,37 +1721,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &274243792
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 274243793}
-  m_Layer: 0
-  m_Name: First Person Camera
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &274243793
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 274243792}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 967640879}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &448695814
 GameObject:
   m_ObjectHideFlags: 0
@@ -3221,6 +3190,7 @@ GameObject:
   - component: {fileID: 755084181}
   - component: {fileID: 755084184}
   - component: {fileID: 755084185}
+  - component: {fileID: 755084186}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -3237,7 +3207,7 @@ Transform:
   m_GameObject: {fileID: 755084178}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 6.04, z: -0.007485216}
+  m_LocalPosition: {x: 0, y: 6.04, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3370,6 +3340,20 @@ MonoBehaviour:
   _playerSettings: {fileID: 11400000, guid: 42e0940c7a25c354b8c4d80357a900bb, type: 2}
   _playerSlopeSettings: {fileID: 11400000, guid: 3699b09683454e940a4081903da75f6a, type: 2}
   _mainCamera: {fileID: 539603833}
+--- !u!114 &755084186
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 755084178}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b0c2ddb62edd7d4a8f6e95cf4fbce3c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PlayerScripts::PickUpMechanic
+  _inputReader: {fileID: 0}
+  _playerCamera: {fileID: 539603833}
 --- !u!1 &967640878
 GameObject:
   m_ObjectHideFlags: 0
@@ -3401,7 +3385,6 @@ Transform:
   m_Children:
   - {fileID: 755084179}
   - {fileID: 1849542813}
-  - {fileID: 274243793}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!43 &1064538674

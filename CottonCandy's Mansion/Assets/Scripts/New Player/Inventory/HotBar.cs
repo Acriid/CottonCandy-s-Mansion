@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HotBar : MonoBehaviour, IHotbar
+public class HotBar : IHotbar
 {
     private GameObject _currentlyHeldItem;
     private GameObject _offHandItem;
